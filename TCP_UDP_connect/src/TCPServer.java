@@ -27,7 +27,7 @@ public class TCPServer {
            capitalizedSentence = clientSentence.toUpperCase() + '\n'; 
 
            outToClient.writeBytes(capitalizedSentence); 
-        } 
+        }
     } 
 } 
 

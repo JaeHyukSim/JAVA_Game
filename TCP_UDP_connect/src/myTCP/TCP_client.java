@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -54,6 +55,7 @@ class TCP_Client_Output implements Runnable{
 public class TCP_client{
 
 	public static void main(String[] args) {
+		
 		Scanner scn = new Scanner(System.in);
 		String input;
 		String output;
@@ -62,7 +64,19 @@ public class TCP_client{
 		try {
 			//유저로부터 데이터를 입력받는다.
 			BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+			
+			
 			socket = new Socket("localhost", 16789);
+			
+			/*
+			socket = new Socket();
+			InetSocketAddress ipep = new InetSocketAddress("127.0.0.1", 16789);
+			socket.connect(ipep);
+			*/
+			//socket = new Socket("211.238.142.196", 16789);
+			
+			
+			
 			//서버로 보내는 버퍼를 만든다.
 			DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
 			//서버로부터 입력받는 버퍼를 만든다.
