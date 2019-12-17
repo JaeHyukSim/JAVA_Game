@@ -1,5 +1,7 @@
 package myTCP;
-
+/*
+ * it is revised
+ */
 import java.util.ArrayList;
 
 public class Station implements Observable{
