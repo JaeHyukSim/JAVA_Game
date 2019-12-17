@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
@@ -67,16 +68,13 @@ public class TCP_client{
 			
 			
 			socket = new Socket("localhost", 16789);
+			System.out.println("서버에 연결 되었습니다...");
 			
-			/*
-			socket = new Socket();
-			InetSocketAddress ipep = new InetSocketAddress("127.0.0.1", 16789);
-			socket.connect(ipep);
-			*/
-			//socket = new Socket("211.238.142.196", 16789);
-			
-			
-			
+			InetAddress ia = socket.getInetAddress();
+			int port = socket.getLocalPort();
+			String ip = ia.getHostAddress();
+			System.out.println("접속한 서버 정보:" + "Local Port : "
+			+ port + "IP : " + ip);
 			//서버로 보내는 버퍼를 만든다.
 			DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
 			//서버로부터 입력받는 버퍼를 만든다.

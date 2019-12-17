@@ -42,18 +42,6 @@ public class TCP_UserThread implements Runnable{
 			while(true) {
 				inputData = inFromClient.readLine();
 				station.notifyAllObserver(inputData);
-				//로직
-				/*
-				outputData = inputData.toUpperCase();
-				outToClient.writeBytes(outputData + '\n'); //요부분을 이용해서 broadcasting
-				*/
-				/*
-				try {
-					chargeBuffer(inputData.toUpperCase());
-				}catch(InterruptedException e) {
-					
-				}
-				*/
 			}
 		}catch(IOException e) {
 			System.out.println("client : " + ID + " out");
