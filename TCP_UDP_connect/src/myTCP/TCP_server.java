@@ -1,6 +1,7 @@
 package myTCP;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 
 public class TCP_server {

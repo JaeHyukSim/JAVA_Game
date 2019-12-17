@@ -16,7 +16,6 @@ public class BroadThread implements Observer, Runnable{
 	public BroadThread(BufferedReader br, Station st, DataOutputStream d,TCP_UserThread tc) {
 		this.bf = br; this.station = st; this.dataOut = d;
 		station.registerObserver(this);
-		System.out.println("BroadThread - Station - connected");
 		this.tcpUserThread = tc;
 	}
 	

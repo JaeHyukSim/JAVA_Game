@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -28,7 +29,14 @@ public class TCP_ConnectionThread implements Runnable{
 		try {
 			while(true) {
 				socket = sSocket.accept();
+				
+				InetAddress ia = socket.getInetAddress();
+				int port = socket.getLocalPort();
+				String ip = ia.getHostAddress();
+				
 				System.out.println(count + ". user : connected!");
+				System.out.println("Local Port : " + port + ", IP : "
+						+ ip);
 				
 				//User thread研 持失馬切
 				Runnable r = new TCP_UserThread(count, socket, station);
