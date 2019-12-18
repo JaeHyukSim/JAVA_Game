@@ -22,6 +22,7 @@ public class BroadThread implements Observer, Runnable{
 	@Override
 	public void run() {
 		
+		
 	}
 	
 	public void update(String s) {

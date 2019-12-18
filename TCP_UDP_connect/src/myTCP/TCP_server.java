@@ -17,8 +17,9 @@ public class TCP_server {
 			Thread t = new Thread(r);
 			t.start();
 			
-			System.out.println("server end");
-		}catch (IOException e) {
+		}catch 
+		
+		(IOException e) {
 			System.out.println("exception : IOE exception");
 		}
 	}
