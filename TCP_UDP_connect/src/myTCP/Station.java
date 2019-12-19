@@ -9,26 +9,8 @@ public class Station implements Observable{
 	private ArrayList<Observer> arr;
 	MyMessageFormat mmsg;
 	
-	public boolean isWhisperIsReady() {
-		return whisperIsReady;
-	}
-	public void setWhisperIsReady(boolean whisperIsReady) {
-		this.whisperIsReady = whisperIsReady;
-	}
-	public boolean isWhispering() {
-		return whispering;
-	}
-	public void setWhispering(boolean whispering) {
-		this.whispering = whispering;
-	}
-
-	private boolean whisperIsReady;
-	private boolean whispering;
 	
 	public Station() {
-		
-		whisperIsReady = false;
-		whispering = false;
 		
 		mmsg = new MyMessageFormat();
 		arr = new ArrayList<Observer>();
