@@ -40,8 +40,9 @@ class TCP_Client_Input implements Runnable{
 					mmsg.setMethod("broadcast");
 					mmsg.setBody(inputData);
 				}
-				inputData = mmsg.getMessage();
-				outToServer.writeBytes(inputData + '\n');
+				inputData = mmsg.getMessage() + "\n";
+				//outToServer.writeBytes(inputData + '\n');
+				outToServer.write(inputData.getBytes("EUC_KR"));
 			}
 		}catch(IOException e) {
 			System.out.println("input end");
@@ -115,7 +116,7 @@ public class TCP_client{
 			//서버로 보내는 버퍼를 만든다.
 			DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
 			//서버로부터 입력받는 버퍼를 만든다.
-			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream(),"EUC_KR"));
 			
 			System.out.println("당신의 닉네임을 입력하세요...");
 			System.out.print(" >");

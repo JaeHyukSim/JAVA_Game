@@ -77,6 +77,7 @@ public class TCP_UserThread implements Runnable{
 						System.out.println("broad cast system");
 						mmsg.setMethod("broadcast");
 						mmsg.setBody((String)jsonObj.get("body"));
+						System.out.println(jsonObj.get("body"));
 						
 						station.notifyAllObserver(mmsg.getMessage());
 					} else if(jsonObj.get("method").equals("header")) {
@@ -106,8 +107,9 @@ public class TCP_UserThread implements Runnable{
 		
 		try {
 			using = true;
-			outputData = s;
-			outToClient.writeBytes(outputData + '\n');
+			outputData = s + "\n";
+			//outToClient.writeBytes(outputData + '\n');
+			outToClient.write(outputData.getBytes("EUC_KR"));
 			using = false;
 			notify();
 		}catch(IOException e) {
