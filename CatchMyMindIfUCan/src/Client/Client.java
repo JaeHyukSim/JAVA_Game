@@ -9,7 +9,7 @@ public class Client {
 	public static void main(String[] args) {
 		try {
 			Socket socket;
-			socket = new Socket("localHost",portNum);
+			socket = new Socket("211.238.142.202",portNum);
 			
 			Runnable userInputThread = new UserInputThread(socket);
 			Thread userThread = new Thread(userInputThread);
