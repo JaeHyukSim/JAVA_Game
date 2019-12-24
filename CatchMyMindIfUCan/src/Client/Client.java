@@ -5,7 +5,7 @@ import java.net.Socket;
 
 public class Client {
 	
-	final static int portNum = 12345;
+	final static int portNum = 16789;
 	public static void main(String[] args) {
 		try {
 			Socket socket;

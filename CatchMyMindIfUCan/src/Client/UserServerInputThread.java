@@ -28,6 +28,7 @@ public class UserServerInputThread implements Runnable{
 		try {
 			while(true) {
 				inputData = inFromServer.readLine();
+				System.out.println(inputData);
 			}
 		}catch(IOException e) {
 			System.out.println("in UserServerInputThread - readLine error");
