@@ -20,7 +20,7 @@ public class UserInputThread implements Runnable{
 	public UserInputThread(Socket socket) {
 		try {
 			//버퍼 두개를 할당한다
-			this.inFromUser = new BufferedReader(new InputStreamReader(socket.getInputStream(),"EUC_KR"));
+			this.inFromUser = new BufferedReader(new InputStreamReader(System.in));
 			this.outToServer = new DataOutputStream(socket.getOutputStream());
 			this.messageForm = new JSONMessage();
 		} catch (UnsupportedEncodingException e) {
@@ -41,7 +41,8 @@ public class UserInputThread implements Runnable{
 				inputData = inFromUser.readLine();
 				
 				//메시지를 만든다
-				inputData = messageForm.getMessage(inputData) + "\n";
+				inputData += "\n";
+				System.out.println("inputdata : " + inputData);
 				outToServer.write(inputData.getBytes("EUC_KR"));
 			}
 		}catch(IOException e) {

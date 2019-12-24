@@ -26,6 +26,8 @@ public class Station implements Observable{
 			o = (Observer)userList.get(i);
 			o.dataSend(data);
 		}
+		System.out.println("broadcasting...");
+		System.out.println(data);
 	}
 	public void unicastObserver(String data, Observer o) {
 		int i = userList.indexOf(o);

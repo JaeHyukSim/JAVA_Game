@@ -32,6 +32,7 @@ public class ServerFromUser implements Runnable, Observer{
 		try {
 			while(true) {
 				userMessage = inFromClient.readLine();
+				station.broadcastObserver(userMessage);
 			}
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
