@@ -13,7 +13,7 @@ public class Client {
 			
 			Runnable userInputThread = new UserInputThread(socket);
 			Thread userThread = new Thread(userInputThread);
-			Runnable userServerInputThread = new UserServerInputThread();
+			Runnable userServerInputThread = new UserServerInputThread(socket);
 			Thread serverThread = new Thread(userServerInputThread);
 			Runnable displayThread = new DisplayThread();
 			Thread display = new Thread(displayThread);

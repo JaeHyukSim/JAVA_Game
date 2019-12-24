@@ -1,5 +1,9 @@
 package UserForm;
 
-public class WaitingRoomForm {
+public class WaitingRoomForm implements UserForm{
 
+	@Override
+	public void display() {
+		
+	}
 }

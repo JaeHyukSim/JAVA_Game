@@ -1,5 +1,9 @@
 package UserForm;
 
-public class SignInForm {
+public class SignInForm implements UserForm{
 
+	@Override
+	public void display() {
+		
+	}
 }
