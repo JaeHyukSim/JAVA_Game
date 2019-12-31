@@ -11,6 +11,7 @@ public class Client {
 			Socket socket;
 			socket = new Socket("211.238.142.202",portNum);
 			
+			/*
 			Runnable userInputThread = new UserInputThread(socket);
 			Thread userThread = new Thread(userInputThread);
 			Runnable userServerInputThread = new UserServerInputThread(socket);
@@ -20,7 +21,7 @@ public class Client {
 			userThread.start();
 			serverThread.start();
 			display.start();
-			
+			*/
 		}catch(IOException e) {
 			System.out.println("in Client -> error : socket");
 		}
