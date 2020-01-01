@@ -4,6 +4,7 @@ package UserForm;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +14,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -140,6 +142,46 @@ public class LoginForm implements UserForm{
 			loginBtn.setFocusPainted(false);
 			loginBtn.setBorderPainted(false);
 			
+			//login btn action
+			loginBtn.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JDialog jd = new JDialog();
+					jd.setLayout(new FlowLayout());
+					jd.setBounds(800, 600, 200, 100);
+					jd.setModal(true);
+					JLabel lb = new JLabel("아이디를 입력하세요");
+					JButton jb = new JButton("확인");
+					jd.add(lb);
+					jd.add(jb);
+					boolean isError = false;
+					jb.addActionListener(new ActionListener() {
+						
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							jd.setVisible(false);
+						}
+					});
+					for(int i = 0; i < textFieldId.getText().length(); i++) {
+						char c = textFieldId.getText().charAt(i);
+						if(!((c >= 'a' && c <= 'z')||(c >= 'A' && c <= 'Z')||(c >= '0' && c <= '9'))) {
+							isError = true;
+						}
+					}
+					if(textFieldId.getText().equals("")) {
+						lb.setText("아이디를 입력하세요!!");
+						jd.setVisible(true);
+					}else if(isError == true) {
+						lb.setText("아이디는 대소문자와 숫자만 가능합니다!!");
+						jd.setSize(300,100);
+						jd.setVisible(true);
+					}else if(textFieldPwd.getText().equals("")) {
+						lb.setText("비밀번호를 입력하세요!!");
+						jd.setVisible(true);
+					}
+				}
+			});
 			//sign up btn
 			ImageIcon SignUpIcon = new ImageIcon(getClass().getResource("..\\Resource\\signUpBtn.png"));
 			
@@ -153,7 +195,7 @@ public class LoginForm implements UserForm{
 			signUpBtn.setFocusPainted(false);
 			signUpBtn.setBorderPainted(false);
 			
-			//get moust pos
+			//get mouse pos
 			/*
 			loginLabel.addMouseListener(new MouseListener() {
 				
@@ -194,6 +236,8 @@ public class LoginForm implements UserForm{
 		}catch(Exception e) {
 			System.out.println("can't apply to a image");
 		}
+		
+		
 	}
 	
 	public static LoginForm getInstance(DisplayThread ds) {
