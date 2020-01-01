@@ -2,6 +2,7 @@ package Client;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
@@ -20,6 +21,8 @@ public class DisplayThread extends JFrame implements Runnable{
 	
 	public final int WIDTH = 360;
 	public final int HEIGHT = 640;
+	public Cursor handCursor;
+	public Cursor defaultCursor;
 	
 	private volatile static DisplayThread uniqueInstance;
 	private CardLayout card;
@@ -28,6 +31,9 @@ public class DisplayThread extends JFrame implements Runnable{
 	//Singleton constructor(ctor)
 	private DisplayThread() {
 		
+		//Cursor
+		handCursor = new Cursor(Cursor.HAND_CURSOR);
+		defaultCursor = new Cursor(Cursor.HAND_CURSOR);
 		//title
 		setTitle("캐치마이마인드");
 		
