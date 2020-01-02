@@ -160,6 +160,8 @@ public class LoginForm implements UserForm{
 						
 						@Override
 						public void actionPerformed(ActionEvent e) {
+							//textFieldId.setText("");
+							//textFieldPwd.setText("");
 							jd.setVisible(false);
 						}
 					});
