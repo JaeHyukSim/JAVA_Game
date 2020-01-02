@@ -12,15 +12,33 @@ import Message.JSONMessage;
 import Message.MessageForm;
 
 public class UserInputThread implements Runnable{
+	public String getInputData() {
+		return inputData;
+	}
+
+	public void setInputData(String inputData) {
+		this.inputData = inputData;
+	}
+
 	private BufferedReader inFromUser;
 	private OutputStream outToServer;
 	private String inputData;
 	private MessageForm messageForm;
 	
-	public UserInputThread(Socket socket) {
+	private volatile static UserInputThread uniqueInstance;
+	
+	public MessageForm getMessageForm() {
+		return messageForm;
+	}
+
+	public void setMessageForm(MessageForm messageForm) {
+		this.messageForm = messageForm;
+	}
+
+	private UserInputThread(Socket socket) {
 		try {
 			//버퍼 두개를 할당한다
-			this.inFromUser = new BufferedReader(new InputStreamReader(System.in));
+			//this.inFromUser = new BufferedReader(new InputStreamReader(System.in));
 			this.outToServer = new DataOutputStream(socket.getOutputStream());
 			this.messageForm = new JSONMessage();
 		} catch (UnsupportedEncodingException e) {
@@ -32,6 +50,18 @@ public class UserInputThread implements Runnable{
 		}
 	}
 	
+	public static UserInputThread getInstance(Socket socket) {
+		if(uniqueInstance == null) {
+			synchronized (DisplayThread.class) {
+				if(uniqueInstance == null) {
+					uniqueInstance = new UserInputThread(socket);
+				}
+			}
+			return uniqueInstance;
+		}
+		return uniqueInstance;
+	}
+	/*
 	@Override
 	public void run(){
 		try {
@@ -45,6 +75,16 @@ public class UserInputThread implements Runnable{
 				System.out.println("inputdata : " + inputData);
 				outToServer.write(inputData.getBytes("EUC_KR"));
 			}
+		}catch(IOException e) {
+			System.out.println("UserInputThread IOException error");
+		}
+	}
+	*/
+	@Override
+	public void run() {
+		try {
+			inputData += "\n";
+			outToServer.write(inputData.getBytes("EUC_KR"));
 		}catch(IOException e) {
 			System.out.println("UserInputThread IOException error");
 		}

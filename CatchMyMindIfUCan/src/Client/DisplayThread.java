@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.net.Socket;
 
 import javax.smartcardio.Card;
 import javax.swing.ImageIcon;
@@ -24,13 +25,15 @@ public class DisplayThread extends JFrame implements Runnable{
 	public Cursor handCursor;
 	public Cursor defaultCursor;
 	
+	private Socket socket;
 	private volatile static DisplayThread uniqueInstance;
 	private CardLayout card;
 	private UserForm userForm;
 	
 	//Singleton constructor(ctor)
-	private DisplayThread() {
+	private DisplayThread(Socket socket) {
 		
+		this.socket = socket;
 		//Cursor
 		handCursor = new Cursor(Cursor.HAND_CURSOR);
 		defaultCursor = new Cursor(Cursor.HAND_CURSOR);
@@ -49,7 +52,7 @@ public class DisplayThread extends JFrame implements Runnable{
 		
 		
 		//pushTemp////////////
-		LoginForm login = LoginForm.getInstance(this);
+		LoginForm login = LoginForm.getInstance(this, socket);
 		WaitingRoomForm waitingRoom = WaitingRoomForm.getInstance(this);
 		getContentPane().add(login.getJPanel(), "login");
 		getContentPane().add(waitingRoom.getJPanel(),"waitingRoom");
@@ -61,11 +64,11 @@ public class DisplayThread extends JFrame implements Runnable{
 	}
 	
 	//Singleton Pattern
-	public static DisplayThread getInstance() {
+	public static DisplayThread getInstance(Socket socket) {
 		if(uniqueInstance == null) {
 			synchronized (DisplayThread.class) {
 				if(uniqueInstance == null) {
-					uniqueInstance = new DisplayThread();
+					uniqueInstance = new DisplayThread(socket);
 				}
 			}
 		}

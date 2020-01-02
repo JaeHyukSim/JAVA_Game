@@ -21,7 +21,7 @@ public class WaitingRoomForm implements UserForm{
 		jpanel = new JPanel();
 		jpanel.setBackground(Color.RED);
 		
-		JButton btn = new JButton("ë¡œê·¸ì¸ìœ¼ë¡œ");
+		JButton btn = new JButton("·Î±×ÀÎÀ¸·Î");
 		jpanel.add(btn);
 		
 		btn.addActionListener(new ActionListener() {

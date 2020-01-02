@@ -11,15 +11,23 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.Socket;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import Client.DisplayThread;
+import Client.UserInputThread;
+import Client.UserMessageProcessor;
+import Client.UserServerInputThread;
 import sun.rmi.runtime.Log;
 
 public class LoginForm implements UserForm{
@@ -28,12 +36,36 @@ public class LoginForm implements UserForm{
 	private JPanel jpanel;
 	private DisplayThread displayThread;
 	private CardLayout card;
-	
+	private UserMessageProcessor userMessageProcessor;
 	private final double GOLDRATE = 1.618;
+	private Socket socket;
+	private JPanel loginPanel;
 	
-	private LoginForm(DisplayThread ds) {
-		this.displayThread = ds;
+	private JButton gameStartBtn;
+	private JButton jb;
+	private JDialog jd;
+	
+	public JButton getJb() {
+		return jb;
+	}
+
+	public void setJb(JButton jb) {
+		this.jb = jb;
+	}
+
+	public JDialog getJd() {
+		return jd;
+	}
+
+	public void setJd(JDialog jd) {
+		this.jd = jd;
+	}
+
+	private LoginForm(DisplayThread ds, Socket socket) {
+		this.socket = socket;
+		userMessageProcessor = new UserMessageProcessor();
 		
+		this.displayThread = ds;
 		//login panel operation
 		String loginPanelPath = "..\\Resource\\loginPanelImage2.png";
 		jpanel = displayThread.createJPanel(loginPanelPath);
@@ -42,9 +74,9 @@ public class LoginForm implements UserForm{
 		
 		//gamestart panel, login input panel operation
 		JPanel gamePanel = new JPanel();
-		JPanel loginPanel = displayThread.createJPanel(loginPanelPath);
+		loginPanel = displayThread.createJPanel(loginPanelPath);
 		
-		//2개의 jpanel position - golden ratio
+		//2媛쒖쓽 jpanel position - golden ratio
 		int goldenHeight = (int)(ds.HEIGHT / GOLDRATE);
 		gamePanel.setBounds(0, 0, ds.WIDTH,ds.HEIGHT-goldenHeight);
 		loginPanel.setBounds(0,ds.HEIGHT-goldenHeight,ds.WIDTH,goldenHeight);
@@ -61,10 +93,9 @@ public class LoginForm implements UserForm{
 			ImageIcon gameStartBtnIconRollover = new ImageIcon(getClass().getResource("..\\Resource\\gameStartButton_rollover.png"));
 			ImageIcon gameStartBtnIconPressed = new ImageIcon(getClass().getResource("..\\Resource\\gameStartButton_pressed.png"));
 			
-			JButton gameStartBtn = new JButton(gameStartBtnIcon);
+			gameStartBtn = new JButton(gameStartBtnIcon);
 			gameStartBtn.setRolloverIcon(gameStartBtnIconRollover);
 			gameStartBtn.setPressedIcon(gameStartBtnIconPressed);
-			
 			gameStartBtn.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseEntered(MouseEvent me) {
@@ -80,13 +111,18 @@ public class LoginForm implements UserForm{
 					gamePanel.getWidth() * 8 / 10, gamePanel.getHeight() * 8 / 10);
 			gamePanel.add(gameStartBtn);
 			
-			
-			
 			gameStartBtn.setContentAreaFilled(false);
 			gameStartBtn.setFocusPainted(false);
 			gameStartBtn.setBorderPainted(false);
 			
-			
+			gameStartBtn.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
+				}
+			});
+			gameStartBtn.setEnabled(false);
 		}catch(Exception e) {
 			System.out.println("can't find image");
 		}
@@ -101,8 +137,8 @@ public class LoginForm implements UserForm{
 		JPanel loginOkPanel = new JPanel();
 		
 		//inherit - loginPanel
-		loginPanel.add(inputPanel);
-		loginPanel.add(loginOkPanel);
+		loginPanel.add(inputPanel, "inputPanel");
+		loginPanel.add(loginOkPanel, "loginOkPanel");
 		
 		//make inherit decoration - loginPanel - inputPanel
 		inputPanel.setOpaque(false);
@@ -117,8 +153,9 @@ public class LoginForm implements UserForm{
 			inputPanel.add(loginLabel);
 			
 			//textField
-			JTextField textFieldId = new JTextField();
-			JTextField textFieldPwd = new JTextField();
+			JTextField textFieldId = new JTextField(15);
+			JPasswordField textFieldPwd = new JPasswordField(15);
+			
 			textFieldId.setBounds(15, 64, 197, 33);
 			textFieldPwd.setBounds(15, 104, 197, 33);
 			loginLabel.add(textFieldId);
@@ -147,12 +184,12 @@ public class LoginForm implements UserForm{
 				
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					JDialog jd = new JDialog();
+					jd = new JDialog();
 					jd.setLayout(new FlowLayout());
 					jd.setBounds(800, 600, 200, 100);
 					jd.setModal(true);
-					JLabel lb = new JLabel("아이디를 입력하세요");
-					JButton jb = new JButton("확인");
+					JLabel lb = new JLabel();
+					jb = new JButton("확인");
 					jd.add(lb);
 					jd.add(jb);
 					boolean isError = false;
@@ -169,16 +206,29 @@ public class LoginForm implements UserForm{
 							isError = true;
 						}
 					}
-					if(textFieldId.getText().equals("")) {
+					if(textFieldId.getText().length() == 0) {
 						lb.setText("아이디를 입력하세요!!");
 						jd.setVisible(true);
 					}else if(isError == true) {
-						lb.setText("아이디는 대소문자와 숫자만 가능합니다!!");
+						lb.setText("아이디는 대소문자와 숫자의 조합만 가능합니다!!");
 						jd.setSize(300,100);
 						jd.setVisible(true);
-					}else if(textFieldPwd.getText().equals("")) {
+					}else if(textFieldPwd.getPassword().length == 0) {
 						lb.setText("비밀번호를 입력하세요!!");
 						jd.setVisible(true);
+					}else {
+						//1. json data를 만든다.
+						String sendData = "{";
+						sendData += userMessageProcessor.getJSONData("method", "1000");
+						sendData += userMessageProcessor.getJSONData("id", textFieldId.getText());
+						sendData += userMessageProcessor.getJSONData("pwd", String.valueOf(textFieldPwd.getPassword()));
+						sendData += "}";
+						//2. 서버로 보낸다.
+						UserInputThread unt = UserInputThread.getInstance(socket);
+						unt.setInputData(sendData);
+						Runnable userInputThread = unt;
+						Thread userThread = new Thread(userInputThread);
+						userThread.start();
 					}
 				}
 			});
@@ -232,19 +282,22 @@ public class LoginForm implements UserForm{
 			
 			*/
 			
-			
 		}catch(Exception e) {
 			System.out.println("can't apply to a image");
 		}
 		
+		//make inherit decoration - loginPanel - loginOkPanel
+				loginOkPanel.setOpaque(false);
+				loginOkPanel.setLayout(null);
+				gameStartBtn.setEnabled(true);
 		
 	}
 	
-	public static LoginForm getInstance(DisplayThread ds) {
+	public static LoginForm getInstance(DisplayThread ds, Socket socket) {
 		if(uniqueInstance == null) {
 			synchronized (LoginForm.class) {
 				if(uniqueInstance == null) {
-					uniqueInstance = new LoginForm(ds);
+					uniqueInstance = new LoginForm(ds, socket);
 				}
 			}
 		}
@@ -258,5 +311,22 @@ public class LoginForm implements UserForm{
 	@Override
 	public JPanel getJPanel() {
 		return jpanel;
+	}
+	
+	public void makeJDialog(String data) {
+		//JDialog jd = new JDialog();
+		jd.setLayout(new FlowLayout());
+		jd.setBounds(800, 600, 200, 100);
+		jd.setModal(true);
+		JLabel lb = new JLabel(data);
+		//JButton jb = new JButton("확인");
+		jd.add(lb);
+		jd.add(jb);
+		jd.setVisible(true);
+		
+	}
+	
+	public void swapLogin() {
+		card.show(loginPanel,"loginOkPanel");
 	}
 }
