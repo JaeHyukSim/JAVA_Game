@@ -119,6 +119,7 @@ public class LoginForm implements UserForm{
 				
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					displayThread.setBounds(300, 0, 1024,1024);
 					displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
 				}
 			});
@@ -247,43 +248,6 @@ public class LoginForm implements UserForm{
 			signUpBtn.setFocusPainted(false);
 			signUpBtn.setBorderPainted(false);
 			
-			//get mouse pos
-			/*
-			loginLabel.addMouseListener(new MouseListener() {
-				
-				@Override
-				public void mouseReleased(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void mousePressed(MouseEvent e) {
-					// TODO Auto-generated method stub
-					System.out.println("(" + e.getX() + "," + e.getY() + ")");
-				}
-				
-				@Override
-				public void mouseExited(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-			});
-			
-			*/
-			
 		}catch(Exception e) {
 			System.out.println("can't apply to a image");
 		}
@@ -291,7 +255,6 @@ public class LoginForm implements UserForm{
 		//make inherit decoration - loginPanel - loginOkPanel
 				loginOkPanel.setOpaque(false);
 				loginOkPanel.setLayout(null);
-				gameStartBtn.setEnabled(true);
 		
 	}
 	
@@ -330,5 +293,6 @@ public class LoginForm implements UserForm{
 	
 	public void swapLogin() {
 		card.show(loginPanel,"loginOkPanel");
+		gameStartBtn.setEnabled(true);
 	}
 }

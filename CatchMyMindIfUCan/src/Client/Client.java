@@ -9,9 +9,10 @@ public class Client {
 	public static void main(String[] args) {
 		try {
 			Socket socket;
-			socket = new Socket("211.238.142.202",portNum);
+			//socket = new Socket("211.238.142.202",portNum);
+			socket = new Socket("localhost", portNum);
 			
-			
+			System.out.println("here");
 			//Runnable userInputThread = new UserInputThread(socket);
 			//Runnable userInputThread = UserInputThread.getInstance(socket);
 			//Thread userThread = new Thread(userInputThread);
