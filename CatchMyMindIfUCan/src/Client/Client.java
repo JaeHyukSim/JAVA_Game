@@ -11,17 +11,18 @@ public class Client {
 			Socket socket;
 			socket = new Socket("211.238.142.202",portNum);
 			
-			/*
-			Runnable userInputThread = new UserInputThread(socket);
-			Thread userThread = new Thread(userInputThread);
+			
+			//Runnable userInputThread = new UserInputThread(socket);
+			//Runnable userInputThread = UserInputThread.getInstance(socket);
+			//Thread userThread = new Thread(userInputThread);
 			Runnable userServerInputThread = new UserServerInputThread(socket);
 			Thread serverThread = new Thread(userServerInputThread);
-			Runnable displayThread = new DisplayThread();
+			Runnable displayThread = DisplayThread.getInstance(socket);
 			Thread display = new Thread(displayThread);
-			userThread.start();
+			//userThread.start();
 			serverThread.start();
 			display.start();
-			*/
+			
 		}catch(IOException e) {
 			System.out.println("in Client -> error : socket");
 		}

@@ -13,8 +13,18 @@ public class ServerFromUser implements Runnable, Observer{
 	private ServerMessageProcessor serverMessageProcessor;
 	private String userMessage;
 	private Socket socket;
+	private int id;
 	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public ServerFromUser(Station station, Socket socket) {
+		serverMessageProcessor = new ServerMessageProcessor();
 		this.station = station;
 		this.socket = socket;
 		try {
@@ -32,12 +42,14 @@ public class ServerFromUser implements Runnable, Observer{
 		try {
 			while(true) {
 				userMessage = inFromClient.readLine();
-				station.broadcastObserver(userMessage);
+				userMessage = serverMessageProcessor.processingServerMessage(userMessage);
+				//station.broadcastObserver(userMessage);
+				station.unicastObserver(userMessage, this);
 			}
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
 			station.removeObserver(this);
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	@Override
