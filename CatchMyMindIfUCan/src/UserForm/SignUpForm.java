@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import Client.UserInputThread;
@@ -28,8 +29,8 @@ public class SignUpForm implements UserForm{
 	private JLabel pwdLabel;
 	private JLabel pwdOkLabel;
 	private JTextField idTF;
-	private JTextField pwdTF;
-	private JTextField pwdOkTF;
+	private JPasswordField pwdTF;
+	private JPasswordField pwdOkTF;
 	private JButton isExist;
 	private JButton check;
 	private JButton cencel;
@@ -51,8 +52,8 @@ public class SignUpForm implements UserForm{
 		pwdLabel = new JLabel("비밀번호:");
 		pwdOkLabel = new JLabel("비밀번호 확인:");
 		idTF = new JTextField();
-		pwdTF = new JTextField();
-		pwdOkTF = new JTextField();
+		pwdTF = new JPasswordField();
+		pwdOkTF = new JPasswordField();
 		isExist = new JButton("중복체크");
 		check = new JButton("확인");
 		cencel = new JButton("취소");
@@ -103,6 +104,42 @@ public class SignUpForm implements UserForm{
 					userThread.start();
 				}
 				
+			}
+		});
+		
+		cencel.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setDialLogInvisible();
+			}
+		});
+		check.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("current ID : " + idTF.getText() + ", inputedID : " + inputedId + ", isChecked : " + isChecked);
+				if(idTF.getText().equals("")) {
+					getDialog("아이디를 입력하세요",250,100);
+				}else if(inputedId.equals("") || !(inputedId.equals(idTF.getText()) && isChecked == true)) {
+					getDialog("아이디 중복체크를 하세요", 250, 100);
+				}else if(String.valueOf(pwdTF.getPassword()).equals("") || String.valueOf(pwdOkTF.getPassword()).equals("")) {
+					getDialog("패스워드를 입력하세요!", 250, 100);
+				}else if(!String.valueOf(pwdTF.getPassword()).equals(String.valueOf(pwdOkTF.getPassword()))){
+					getDialog("패스워드가 다릅니다", 250, 100);
+				}else {
+					//1. json data를 만든다.
+					String sendData = "{";
+					sendData += userMessageProcessor.getJSONData("method", "1200");
+					sendData += "," + userMessageProcessor.getJSONData("id", idTF.getText());
+					sendData += "," + userMessageProcessor.getJSONData("pwd", String.valueOf(pwdTF.getPassword()));
+					sendData += "}";
+					//2. 서버로 보낸다.
+					unt.setInputData(sendData);
+					Runnable userInputThread = unt;
+					Thread userThread = new Thread(userInputThread);
+					userThread.start();
+				}
 			}
 		});
 	}

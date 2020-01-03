@@ -126,6 +126,7 @@ public class ServerMessageProcessor {
 		String res = "";
 		//1. data json parsing
 		try {
+			System.out.println("data : " + data);
 			String sendData = "{";
 			
 			JSONParser jsonParser = new JSONParser();
@@ -172,6 +173,32 @@ public class ServerMessageProcessor {
 				sendData += getJSONData("method", "1102");
 				sendData += "}";
 				System.out.println("method to : 1102 , sendData : " + sendData);
+				return sendData;
+			case "1200": // 아이디 만들기 요청
+				for(int i = 0; i < originalArray.size(); i++) {
+					String dataStreamId = (String)((JSONObject)originalArray.get(i)).get("id");
+					if(dataStreamId.equals(jsonObj.get("id"))){
+						sendData += getJSONData("method", "1204");
+						sendData += "}";
+						System.out.println("method to : 1204 , sendData : " + sendData);
+						return sendData;
+					}
+				}
+				body += ",\n";
+				body += "{";
+				body += getJSONData("id", (String)jsonObj.get("id"));
+				body += "," + getJSONData("pwd",(String)jsonObj.get("pwd"));
+				body += "," + getJSONData("lv", "1");
+				body += "," + getJSONData("exp", "0");
+				body += "," + getJSONData("ch", "1");
+				body += "," + getJSONData("friendList", "");
+				body += "}";
+				dataStream = head + body + tail;
+				System.out.println("body : " + body);
+				setFileData();
+				sendData += getJSONData("method", "1202");
+				sendData += "}";
+				System.out.println("method to : 1202, sendData ok");
 				return sendData;
 			}
 			
