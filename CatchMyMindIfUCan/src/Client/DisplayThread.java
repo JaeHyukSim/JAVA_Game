@@ -32,7 +32,7 @@ public class DisplayThread extends JFrame implements Runnable{
 	
 	//Singleton constructor(ctor)
 	private DisplayThread(Socket socket) {
-		
+		System.out.println("displayThread 생성자");
 		this.socket = socket;
 		//Cursor
 		handCursor = new Cursor(Cursor.HAND_CURSOR);

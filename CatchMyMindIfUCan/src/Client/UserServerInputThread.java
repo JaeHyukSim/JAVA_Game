@@ -21,6 +21,9 @@ import UserForm.UserForm;
 import jdk.nashorn.internal.scripts.JD;
 
 public class UserServerInputThread implements Runnable{
+	
+	private volatile static UserServerInputThread uniqueInstance;
+	
 	private BufferedReader inFromServer;
 	private String inputData;
 	
@@ -30,6 +33,43 @@ public class UserServerInputThread implements Runnable{
 	private JDialog jd;
 	private JButton jb;
 	
+	private String id;
+	private String lv;
+	private String exp;
+	private String ch;
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getLv() {
+		return lv;
+	}
+
+	public void setLv(String lv) {
+		this.lv = lv;
+	}
+
+	public String getExp() {
+		return exp;
+	}
+
+	public void setExp(String exp) {
+		this.exp = exp;
+	}
+
+	public String getCh() {
+		return ch;
+	}
+
+	public void setCh(String ch) {
+		this.ch = ch;
+	}
+
 	public UserMessageProcessor getUserMessageProcessor() {
 		return userMessageProcessor;
 	}
@@ -41,7 +81,7 @@ public class UserServerInputThread implements Runnable{
 	private UserForm userForm;
 	private UserMessageProcessor userMessageProcessor;
 	
-	public UserServerInputThread(Socket socket) {
+	private UserServerInputThread(Socket socket) {
 		try {
 			displayThread = DisplayThread.getInstance(socket);
 			loginForm = LoginForm.getInstance(displayThread, socket);
@@ -54,6 +94,19 @@ public class UserServerInputThread implements Runnable{
 			System.out.println("in UserServerInputThread - inFromServer error");
 			e.printStackTrace();
 		}
+	}
+	
+	public static UserServerInputThread getInstance(Socket socket) {
+		if(uniqueInstance == null) {
+			synchronized (UserServerInputThread.class) {
+				if(uniqueInstance == null) {
+					uniqueInstance = new UserServerInputThread(socket);
+				}
+			}
+			return uniqueInstance;
+		}
+		System.out.println("userserverinputthread is not null");
+		return uniqueInstance;
 	}
 	
 	@Override
@@ -95,6 +148,10 @@ public class UserServerInputThread implements Runnable{
 						});
 						break;
 					case "1002":
+						loginForm.setId((String)jsonObj.get("id"));
+						loginForm.setLv((String)jsonObj.get("lv"));
+						loginForm.setExp((String)jsonObj.get("exp"));
+						loginForm.setCh((String)jsonObj.get("ch"));
 						loginForm.swapLogin();
 					}
 				} catch (ParseException e) {

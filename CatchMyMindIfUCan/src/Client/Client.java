@@ -12,11 +12,11 @@ public class Client {
 			//socket = new Socket("211.238.142.202",portNum);
 			socket = new Socket("localhost", portNum);
 			
-			System.out.println("here");
 			//Runnable userInputThread = new UserInputThread(socket);
 			//Runnable userInputThread = UserInputThread.getInstance(socket);
 			//Thread userThread = new Thread(userInputThread);
-			Runnable userServerInputThread = new UserServerInputThread(socket);
+			//Runnable userServerInputThread = new UserServerInputThread(socket);
+			Runnable userServerInputThread = UserServerInputThread.getInstance(socket);
 			Thread serverThread = new Thread(userServerInputThread);
 			Runnable displayThread = DisplayThread.getInstance(socket);
 			Thread display = new Thread(displayThread);

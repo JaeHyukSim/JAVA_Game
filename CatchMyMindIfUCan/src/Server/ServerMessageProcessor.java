@@ -143,6 +143,10 @@ public class ServerMessageProcessor {
 						if(((JSONObject)originalArray.get(i)).get("pwd").equals(jsonObj.get("pwd"))) {
 							//1. id와 pwd 모두 일치 - login success
 							sendData += getJSONData("method", "1002");
+							sendData += "," + getJSONData("id", (String)((JSONObject)originalArray.get(i)).get("id"));
+							sendData += "," + getJSONData("lv", (String)((JSONObject)originalArray.get(i)).get("lv"));
+							sendData += "," + getJSONData("exp", (String)((JSONObject)originalArray.get(i)).get("exp"));
+							sendData += "," + getJSONData("ch", (String)((JSONObject)originalArray.get(i)).get("ch"));
 							sendData += "}";
 							System.out.println(sendData);
 							return sendData;

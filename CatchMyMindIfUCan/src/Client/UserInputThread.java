@@ -12,13 +12,6 @@ import Message.JSONMessage;
 import Message.MessageForm;
 
 public class UserInputThread implements Runnable{
-	public String getInputData() {
-		return inputData;
-	}
-
-	public void setInputData(String inputData) {
-		this.inputData = inputData;
-	}
 
 	private BufferedReader inFromUser;
 	private OutputStream outToServer;
@@ -52,7 +45,7 @@ public class UserInputThread implements Runnable{
 	
 	public static UserInputThread getInstance(Socket socket) {
 		if(uniqueInstance == null) {
-			synchronized (DisplayThread.class) {
+			synchronized (UserInputThread.class) {
 				if(uniqueInstance == null) {
 					uniqueInstance = new UserInputThread(socket);
 				}
@@ -88,5 +81,13 @@ public class UserInputThread implements Runnable{
 		}catch(IOException e) {
 			System.out.println("UserInputThread IOException error");
 		}
+	}
+	
+	public String getInputData() {
+		return inputData;
+	}
+
+	public void setInputData(String inputData) {
+		this.inputData = inputData;
 	}
 }

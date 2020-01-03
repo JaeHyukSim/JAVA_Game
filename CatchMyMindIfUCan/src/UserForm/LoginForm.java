@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.net.Socket;
 
 import javax.swing.ImageIcon;
@@ -45,6 +46,51 @@ public class LoginForm implements UserForm{
 	private JButton jb;
 	private JDialog jd;
 	
+	private JLabel welcomeLabel;
+	private JLabel lvLabel;
+	private JLabel expLabel;
+	private JLabel chLabel;
+	
+	private String id;
+	private String lv;
+	private String exp;
+	private String ch;
+	
+	private UserInputThread unt;
+	
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getLv() {
+		return lv;
+	}
+
+	public void setLv(String lv) {
+		this.lv = lv;
+	}
+
+	public String getExp() {
+		return exp;
+	}
+
+	public void setExp(String exp) {
+		this.exp = exp;
+	}
+
+	public String getCh() {
+		return ch;
+	}
+
+	public void setCh(String ch) {
+		this.ch = ch;
+	}
+
 	public JButton getJb() {
 		return jb;
 	}
@@ -62,7 +108,9 @@ public class LoginForm implements UserForm{
 	}
 
 	private LoginForm(DisplayThread ds, Socket socket) {
+		System.out.println("LoginForm 생성자");
 		this.socket = socket;
+		unt = UserInputThread.getInstance(socket);
 		userMessageProcessor = new UserMessageProcessor();
 		
 		this.displayThread = ds;
@@ -220,6 +268,8 @@ public class LoginForm implements UserForm{
 						lb.setText("비밀번호를 입력하세요!!");
 						jd.setVisible(true);
 					}else {
+						id = textFieldId.getText();
+						System.out.println("id : " + id);
 						//1. json data를 만든다.
 						String sendData = "{";
 						sendData += userMessageProcessor.getJSONData("method", "1000");
@@ -227,7 +277,6 @@ public class LoginForm implements UserForm{
 						sendData += userMessageProcessor.getJSONData("pwd", String.valueOf(textFieldPwd.getPassword()));
 						sendData += "}";
 						//2. 서버로 보낸다.
-						UserInputThread unt = UserInputThread.getInstance(socket);
 						unt.setInputData(sendData);
 						Runnable userInputThread = unt;
 						Thread userThread = new Thread(userInputThread);
@@ -255,7 +304,70 @@ public class LoginForm implements UserForm{
 		//make inherit decoration - loginPanel - loginOkPanel
 				loginOkPanel.setOpaque(false);
 				loginOkPanel.setLayout(null);
-		
+				try {
+					ImageIcon loginOkLabelIcon = new ImageIcon(getClass().getResource("..\\Resource\\loginOkFormBack.png"));
+					
+					JLabel loginOkLabel = new JLabel(loginOkLabelIcon);
+					loginOkLabel.setBounds(12, 75, 320, 192);
+					loginOkPanel.add(loginOkLabel);
+					
+					welcomeLabel = new JLabel();
+					JLabel lvl = new JLabel("LV");
+					lvLabel = new JLabel();
+					JLabel expl = new JLabel("EXP");
+					expLabel = new JLabel();
+					chLabel = new JLabel();
+					
+					welcomeLabel.setBounds(45, 46, 160, 40);
+					lvl.setBounds(48, 90, 15, 10);
+					lvLabel.setBounds(68, 90, 30, 10);
+					expl.setBounds(110, 90, 30, 10);
+					expLabel.setBounds(135, 90, 50, 10);
+					chLabel.setBounds(217,34,70,100);
+					
+					loginOkLabel.add(welcomeLabel);
+					loginOkLabel.add(lvLabel);
+					loginOkLabel.add(lvl);
+					loginOkLabel.add(expl);
+					loginOkLabel.add(expLabel);
+					loginOkLabel.add(chLabel);
+					
+					
+					loginOkLabel.addMouseListener(new MouseListener() {
+						
+						@Override
+						public void mouseReleased(MouseEvent e) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void mousePressed(MouseEvent e) {
+							// TODO Auto-generated method stub
+							System.out.println("(" + e.getX() + "," + e.getY() + ")");
+						}
+						
+						@Override
+						public void mouseExited(MouseEvent e) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void mouseEntered(MouseEvent e) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void mouseClicked(MouseEvent e) {
+							// TODO Auto-generated method stub
+							
+						}
+					});
+				}catch(Exception e) {
+					System.out.println("LoginForm - loginOkPanel error");
+				}
 	}
 	
 	public static LoginForm getInstance(DisplayThread ds, Socket socket) {
@@ -294,5 +406,13 @@ public class LoginForm implements UserForm{
 	public void swapLogin() {
 		card.show(loginPanel,"loginOkPanel");
 		gameStartBtn.setEnabled(true);
+		labelTextChange(welcomeLabel, "\"" + id + "\"" + "님 환영합니다!");
+		labelTextChange(lvLabel, lv);
+		labelTextChange(expLabel, exp);
+		labelTextChange(chLabel, ch);
+	}
+	
+	public void labelTextChange(JLabel l, String d) {
+		l.setText(d);
 	}
 }
