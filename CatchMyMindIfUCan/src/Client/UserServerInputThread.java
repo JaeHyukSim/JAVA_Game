@@ -17,6 +17,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import UserForm.LoginForm;
+import UserForm.SignUpForm;
 import UserForm.UserForm;
 import jdk.nashorn.internal.scripts.JD;
 
@@ -27,6 +28,7 @@ public class UserServerInputThread implements Runnable{
 	private BufferedReader inFromServer;
 	private String inputData;
 	
+	private SignUpForm signUpForm;
 	private JPanel jpanel;
 	private DisplayThread displayThread;
 	private LoginForm loginForm;
@@ -83,6 +85,7 @@ public class UserServerInputThread implements Runnable{
 	
 	private UserServerInputThread(Socket socket) {
 		try {
+			signUpForm = SignUpForm.getInstance(socket);
 			displayThread = DisplayThread.getInstance(socket);
 			loginForm = LoginForm.getInstance(displayThread, socket);
 			jpanel = loginForm.getJPanel();
@@ -114,7 +117,6 @@ public class UserServerInputThread implements Runnable{
 		try {
 			while(true) {
 				inputData = inFromServer.readLine();
-				System.out.println(inputData);
 				
 				JSONParser jsonParser = new JSONParser();
 				try {
@@ -153,6 +155,13 @@ public class UserServerInputThread implements Runnable{
 						loginForm.setExp((String)jsonObj.get("exp"));
 						loginForm.setCh((String)jsonObj.get("ch"));
 						loginForm.swapLogin();
+						break;
+					case "1104":
+						signUpForm.setIsCheck(false);
+						break;
+					case "1102":
+						signUpForm.setIsCheck(true);
+						break;
 					}
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block

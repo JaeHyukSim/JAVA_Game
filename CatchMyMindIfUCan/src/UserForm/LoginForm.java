@@ -35,10 +35,15 @@ public class LoginForm implements UserForm{
 	
 	private volatile static LoginForm uniqueInstance;
 	private JPanel jpanel;
-	private DisplayThread displayThread;
 	private CardLayout card;
+	
 	private UserMessageProcessor userMessageProcessor;
+	private DisplayThread displayThread;
+	private SignUpForm signUpForm;
+	
 	private final double GOLDRATE = 1.618;
+	
+	
 	private Socket socket;
 	private JPanel loginPanel;
 	
@@ -108,7 +113,6 @@ public class LoginForm implements UserForm{
 	}
 
 	private LoginForm(DisplayThread ds, Socket socket) {
-		System.out.println("LoginForm 생성자");
 		this.socket = socket;
 		unt = UserInputThread.getInstance(socket);
 		userMessageProcessor = new UserMessageProcessor();
@@ -269,13 +273,13 @@ public class LoginForm implements UserForm{
 						jd.setVisible(true);
 					}else {
 						id = textFieldId.getText();
-						System.out.println("id : " + id);
 						//1. json data를 만든다.
 						String sendData = "{";
 						sendData += userMessageProcessor.getJSONData("method", "1000");
-						sendData += userMessageProcessor.getJSONData("id", textFieldId.getText());
-						sendData += userMessageProcessor.getJSONData("pwd", String.valueOf(textFieldPwd.getPassword()));
+						sendData += "," + userMessageProcessor.getJSONData("id", textFieldId.getText());
+						sendData += "," + userMessageProcessor.getJSONData("pwd", String.valueOf(textFieldPwd.getPassword()));
 						sendData += "}";
+						System.out.println(sendData);
 						//2. 서버로 보낸다.
 						unt.setInputData(sendData);
 						Runnable userInputThread = unt;
@@ -302,7 +306,8 @@ public class LoginForm implements UserForm{
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
-					//new SignUpForm(socket);
+					signUpForm = SignUpForm.getInstance(socket);
+					signUpForm.setDialLogVisible();
 				}
 			});
 			

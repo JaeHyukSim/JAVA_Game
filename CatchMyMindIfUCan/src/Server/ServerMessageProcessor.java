@@ -124,7 +124,6 @@ public class ServerMessageProcessor {
 	//가장 중요한 것 - 받은 JSON Message Processing
 	public String processingServerMessage(String data) {
 		String res = "";
-		
 		//1. data json parsing
 		try {
 			String sendData = "{";
@@ -148,7 +147,6 @@ public class ServerMessageProcessor {
 							sendData += "," + getJSONData("exp", (String)((JSONObject)originalArray.get(i)).get("exp"));
 							sendData += "," + getJSONData("ch", (String)((JSONObject)originalArray.get(i)).get("ch"));
 							sendData += "}";
-							System.out.println(sendData);
 							return sendData;
 						}else {
 						//2. pwd가 틀림. - login pwd fail
@@ -160,6 +158,20 @@ public class ServerMessageProcessor {
 				}
 				sendData += getJSONData("method", "1004");
 				sendData += "}";
+				return sendData;
+			case "1100": //중복확인
+				for(int i = 0; i < originalArray.size(); i++) {
+					String dataStreamId = (String)((JSONObject)originalArray.get(i)).get("id");
+					if(dataStreamId.equals(jsonObj.get("id"))){
+						sendData += getJSONData("method", "1104");
+						sendData += "}";
+						System.out.println("method to : 1104 , sendData : " + sendData);
+						return sendData;
+					}
+				}
+				sendData += getJSONData("method", "1102");
+				sendData += "}";
+				System.out.println("method to : 1102 , sendData : " + sendData);
 				return sendData;
 			}
 			

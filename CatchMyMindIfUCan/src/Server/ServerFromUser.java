@@ -42,6 +42,7 @@ public class ServerFromUser implements Runnable, Observer{
 		try {
 			while(true) {
 				userMessage = inFromClient.readLine();
+				System.out.println("userMessage : " + userMessage);
 				userMessage = serverMessageProcessor.processingServerMessage(userMessage);
 				//station.broadcastObserver(userMessage);
 				station.unicastObserver(userMessage, this);

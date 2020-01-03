@@ -1,2 +1,2 @@
 {"id":"#dummy"},
-{"id":"testId","pwd":"1234","ch":"1","lv":"1","exp":"0"}
+{"id":"testId","pwd":"1234","ch":"1","lv":"1","exp":"0", "friendList" : ["test1","test2","test3"], "state" : "0"}
