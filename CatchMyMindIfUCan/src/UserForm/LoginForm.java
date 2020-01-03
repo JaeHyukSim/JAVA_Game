@@ -297,6 +297,15 @@ public class LoginForm implements UserForm{
 			signUpBtn.setFocusPainted(false);
 			signUpBtn.setBorderPainted(false);
 			
+			signUpBtn.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					//new SignUpForm(socket);
+				}
+			});
+			
 		}catch(Exception e) {
 			System.out.println("can't apply to a image");
 		}

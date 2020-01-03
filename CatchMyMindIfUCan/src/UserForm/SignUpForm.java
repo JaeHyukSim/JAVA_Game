@@ -2,8 +2,9 @@ package UserForm;
 
 import javax.swing.JPanel;
 
-public class SignInForm implements UserForm{
+public class SignUpForm implements UserForm{
 
+	
 	@Override
 	public void display() {
 		
