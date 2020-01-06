@@ -122,10 +122,10 @@ public class UserServerInputThread implements Runnable{
 				try {
 					JSONObject jsonObj = (JSONObject)jsonParser.parse(inputData);
 					
-					//µ¿ÀÛ ½ÃÀÛ
+					//operation start
 					switch((String)jsonObj.get("method")) {
-					case "1004":	//¾ÆÀÌµğ ¿À·ù
-						loginForm.makeJDialog("¾ÆÀÌµğ°¡ Æ²·È½À´Ï´Ù.");
+					case "1004":	//id - error
+						loginForm.makeJDialog("ì•„ì´ë””ê°€ í‹€ë ¸ìŠµë‹ˆë‹¤.");
 						jb = loginForm.getJb();
 						jd = loginForm.getJd();
 						
@@ -137,8 +137,8 @@ public class UserServerInputThread implements Runnable{
 							}
 						});
 						break;
-					case "1014":
-						loginForm.makeJDialog("ºñ¹Ğ¹øÈ£°¡ Æ²·È½À´Ï´Ù");
+					case "1014": // pwd - error
+						loginForm.makeJDialog("ë¹„ë°€ë²ˆí˜¸ê°€ í‹€ë ¸ìŠµë‹ˆë‹¤.");
 						jb = loginForm.getJb();
 						jd = loginForm.getJd();
 						jb.addActionListener(new ActionListener() {
@@ -149,26 +149,26 @@ public class UserServerInputThread implements Runnable{
 							}
 						});
 						break;
-					case "1002":
+					case "1002": // login ok
 						loginForm.setId((String)jsonObj.get("id"));
 						loginForm.setLv((String)jsonObj.get("lv"));
 						loginForm.setExp((String)jsonObj.get("exp"));
 						loginForm.setCh((String)jsonObj.get("ch"));
 						loginForm.swapLogin();
 						break;
-					case "1104":
+					case "1104": //id check is failed
 						signUpForm.setIsCheck(false);
 						break;
-					case "1102":
+					case "1102": // id check is verified
 						signUpForm.setIsCheck(true);
 						break;
-					case "1202":
-						signUpForm.getDialog("È¸¿ø°¡ÀÔ ¼º°ø!", 250, 100);
+					case "1202": //sign up OK
+						signUpForm.getDialog("íšŒì›ê°€ì… ì„±ê³µ!", 250, 100);
 						signUpForm.setDialLogInvisible();
 						signUpForm.dialogClear();
 						break;
-					case "1204":
-						signUpForm.getDialog("È¸¿ø°¡ÀÔ¿¡ ½ÇÆĞÇß½À´Ï´Ù.", 250, 100);
+					case "1204": //íšŒì›ê°€ì… ì‹¤íŒ¨
+						signUpForm.getDialog("íšŒì›ê°€ì…ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.", 250, 100);
 						signUpForm.dialogClear();
 					}
 				} catch (ParseException e) {

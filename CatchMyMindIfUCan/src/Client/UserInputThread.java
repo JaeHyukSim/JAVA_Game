@@ -30,7 +30,7 @@ public class UserInputThread implements Runnable{
 
 	private UserInputThread(Socket socket) {
 		try {
-			//¹öÆÛ µÎ°³¸¦ ÇÒ´çÇÑ´Ù
+			//ë²„í¼ ë‘ê°œë¥¼ í• ë‹¹í•œë‹¤
 			//this.inFromUser = new BufferedReader(new InputStreamReader(System.in));
 			this.outToServer = new DataOutputStream(socket.getOutputStream());
 			this.messageForm = new JSONMessage();
@@ -54,25 +54,7 @@ public class UserInputThread implements Runnable{
 		}
 		return uniqueInstance;
 	}
-	/*
-	@Override
-	public void run(){
-		try {
-			while(true) {
-				//»ç¿ëÀÚ·ÎºÎÅÍ ÀÔ·ÂÀ» ¹Þ´Â´Ù
-				System.out.println(">");
-				inputData = inFromUser.readLine();
-				
-				//¸Þ½ÃÁö¸¦ ¸¸µç´Ù
-				inputData += "\n";
-				System.out.println("inputdata : " + inputData);
-				outToServer.write(inputData.getBytes("EUC_KR"));
-			}
-		}catch(IOException e) {
-			System.out.println("UserInputThread IOException error");
-		}
-	}
-	*/
+	
 	@Override
 	public void run() {
 		try {

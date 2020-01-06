@@ -128,7 +128,7 @@ public class LoginForm implements UserForm{
 		JPanel gamePanel = new JPanel();
 		loginPanel = displayThread.createJPanel(loginPanelPath);
 		
-		//2媛쒖쓽 jpanel position - golden ratio
+		//2 jpanel position - golden ratio
 		int goldenHeight = (int)(ds.HEIGHT / GOLDRATE);
 		gamePanel.setBounds(0, 0, ds.WIDTH,ds.HEIGHT-goldenHeight);
 		loginPanel.setBounds(0,ds.HEIGHT-goldenHeight,ds.WIDTH,goldenHeight);

@@ -78,7 +78,7 @@ public class ServerMessageProcessor {
 		this.tail = tail;
 	}
 
-	//파일 내용을 userData에 집어넣기
+	//put to variable 'userData' from File
 	public void getFileData() {
 		File file = new File(filePath + "..\\Resource\\ServerResource\\userData.json");
 		
@@ -112,7 +112,7 @@ public class ServerMessageProcessor {
 		}
 	}
 	
-	//파일로 저장하기
+	//Save to file
 	public void setFileData() {
 		File file = new File(filePath + "..\\..\\src\\Resource\\ServerResource\\userData.json");
 		try {
@@ -133,7 +133,7 @@ public class ServerMessageProcessor {
 		return false;
 	}
 	
-	//데이터 만들기
+	//make json data
 	public String getJSONData(String key, String value) {
 		String res = "";
 		res += "\"" + key +"\"" + ":";
@@ -141,7 +141,7 @@ public class ServerMessageProcessor {
 		return res;
 	}
 	
-	//가장 중요한 것 - 받은 JSON Message Processing
+	//very important factor : JSON Message Processing
 	public String processingServerMessage(String data) {
 		String res = "";
 		//1. data json parsing
@@ -153,13 +153,13 @@ public class ServerMessageProcessor {
 			JSONObject jsonObj = (JSONObject)jsonParser.parse(data);
 			JSONArray originalArray = (JSONArray)userData.get("USER_DATA");
 			
-			//2. data의 method를 본다. - method별로 대응을 다르게 한다
+			//2. look the method of data - cope with each method differently
 			switch((String)jsonObj.get("method")) {
-			case "1000": // 로그인 신청
+			case "1000": // login message
 				for(int i = 0; i < originalArray.size(); i++) {
 					if(((JSONObject)originalArray.get(i)).get("id").equals(jsonObj.get("id"))) {
 						if(((JSONObject)originalArray.get(i)).get("pwd").equals(jsonObj.get("pwd"))) {
-							//1. id와 pwd 모두 일치 - login success
+							//1. both id and password match - login success
 							sendData += getJSONData("method", "1002");
 							sendData += "," + getJSONData("id", (String)((JSONObject)originalArray.get(i)).get("id"));
 							sendData += "," + getJSONData("lv", (String)((JSONObject)originalArray.get(i)).get("lv"));
@@ -168,7 +168,7 @@ public class ServerMessageProcessor {
 							sendData += "}";
 							return sendData;
 						}else {
-						//2. pwd가 틀림. - login pwd fail
+						//2. password is wrong - login pwd fail
 						sendData += getJSONData("method", "1014");
 						sendData += "}";
 						return sendData;
@@ -178,7 +178,7 @@ public class ServerMessageProcessor {
 				sendData += getJSONData("method", "1004");
 				sendData += "}";
 				return sendData;
-			case "1100": //중복확인
+			case "1100": //Check for duplicates
 				for(int i = 0; i < originalArray.size(); i++) {
 					String dataStreamId = (String)((JSONObject)originalArray.get(i)).get("id");
 					if(dataStreamId.equals(jsonObj.get("id"))){
@@ -192,7 +192,7 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				System.out.println("method to : 1102 , sendData : " + sendData);
 				return sendData;
-			case "1200": // 아이디 만들기 요청
+			case "1200": // ID creation request
 				for(int i = 0; i < originalArray.size(); i++) {
 					String dataStreamId = (String)((JSONObject)originalArray.get(i)).get("id");
 					if(dataStreamId.equals(jsonObj.get("id"))){
@@ -222,7 +222,7 @@ public class ServerMessageProcessor {
 				return sendData;
 			}
 			
-			//3. data를 전송할 형태로 만든다.
+			//3. Make data in the form of transmission
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

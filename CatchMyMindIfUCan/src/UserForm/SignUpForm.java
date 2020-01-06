@@ -48,19 +48,19 @@ public class SignUpForm implements UserForm{
 		isChecked = false;
 		
 		jdialog = new JDialog();
-		idLabel = new JLabel("¾ÆÀÌµğ:");
-		pwdLabel = new JLabel("ºñ¹Ğ¹øÈ£:");
-		pwdOkLabel = new JLabel("ºñ¹Ğ¹øÈ£ È®ÀÎ:");
+		idLabel = new JLabel("ì•„ì´ë””:");
+		pwdLabel = new JLabel("ë¹„ë°€ë²ˆí˜¸:");
+		pwdOkLabel = new JLabel("ë¹„ë°€ë²ˆí˜¸ í™•ì¸:");
 		idTF = new JTextField();
 		pwdTF = new JPasswordField();
 		pwdOkTF = new JPasswordField();
-		isExist = new JButton("Áßº¹Ã¼Å©");
-		check = new JButton("È®ÀÎ");
-		cencel = new JButton("Ãë¼Ò");
+		isExist = new JButton("ì¤‘ë³µì²´í¬");
+		check = new JButton("í™•ì¸");
+		cencel = new JButton("ì·¨ì†Œ");
 		
 		jdialog.setLayout(null);
 		jdialog.setModal(true);
-		jdialog.setTitle("È¸¿ø°¡ÀÔ");
+		jdialog.setTitle("íšŒì›ê°€ì…");
 		
 		jdialog.setSize(350,350);
 		idLabel.setBounds(30, 40, 50, 30);
@@ -95,18 +95,18 @@ public class SignUpForm implements UserForm{
 					}
 				}
 				if(idTF.getText().equals("")) {
-					//1. dialog »ı¼º
-					getDialog("¾ÆÀÌµğ¸¦ ÀÔ·ÂÇÏ¼¼¿ä", 150, 100);
+					//1. dialog ìƒì„±
+					getDialog("ì•„ì´ë””ë¥¼ ì…ë ¥í•˜ì„¸ìš”", 150, 100);
 				} else if(isGoodId == false) {
-					getDialog("¾ÆÀÌµğ´Â ´ë¼Ò¹®ÀÚ¿Í ¼ıÀÚÀÇ Á¶ÇÕÀ¸·Î¸¸ °¡´ÉÇÕ´Ï´Ù.", 350, 100);
+					getDialog("ì•„ì´ë””ëŠ” ëŒ€ì†Œë¬¸ìì™€ ìˆ«ìì˜ ì¡°í•©ìœ¼ë¡œë§Œ ê°€ëŠ¥í•©ë‹ˆë‹¤.", 350, 100);
 				}else {
 					currentId = idTF.getText();
-					//1. json data¸¦ ¸¸µç´Ù.
+					//1. json dataë¥¼ ë§Œë“ ë‹¤.
 					String sendData = "{";
 					sendData += userMessageProcessor.getJSONData("method", "1100");
 					sendData += "," + userMessageProcessor.getJSONData("id", idTF.getText());
 					sendData += "}";
-					//2. ¼­¹ö·Î º¸³½´Ù.
+					//2. ì„œë²„ë¡œ ë³´ë‚¸ë‹¤.
 					unt.setInputData(sendData);
 					Runnable userInputThread = unt;
 					Thread userThread = new Thread(userInputThread);
@@ -129,21 +129,21 @@ public class SignUpForm implements UserForm{
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("current ID : " + idTF.getText() + ", inputedID : " + inputedId + ", isChecked : " + isChecked);
 				if(idTF.getText().equals("")) {
-					getDialog("¾ÆÀÌµğ¸¦ ÀÔ·ÂÇÏ¼¼¿ä",250,100);
+					getDialog("ì•„ì´ë””ë¥¼ ì…ë ¥í•˜ì„¸ìš”",250,100);
 				}else if(inputedId.equals("") || !(inputedId.equals(idTF.getText()) && isChecked == true)) {
-					getDialog("¾ÆÀÌµğ Áßº¹Ã¼Å©¸¦ ÇÏ¼¼¿ä", 250, 100);
+					getDialog("ì•„ì´ë”” ì¤‘ë³µì²´í¬ë¥¼ í•˜ì„¸ìš”", 250, 100);
 				}else if(String.valueOf(pwdTF.getPassword()).equals("") || String.valueOf(pwdOkTF.getPassword()).equals("")) {
-					getDialog("ÆĞ½º¿öµå¸¦ ÀÔ·ÂÇÏ¼¼¿ä!", 250, 100);
+					getDialog("íŒ¨ìŠ¤ì›Œë“œë¥¼ ì…ë ¥í•˜ì„¸ìš”!", 250, 100);
 				}else if(!String.valueOf(pwdTF.getPassword()).equals(String.valueOf(pwdOkTF.getPassword()))){
-					getDialog("ÆĞ½º¿öµå°¡ ´Ù¸¨´Ï´Ù", 250, 100);
+					getDialog("íŒ¨ìŠ¤ì›Œë“œê°€ ë‹¤ë¦…ë‹ˆë‹¤", 250, 100);
 				}else {
-					//1. json data¸¦ ¸¸µç´Ù.
+					//1. json dataë¥¼ ë§Œë“ ë‹¤.
 					String sendData = "{";
 					sendData += userMessageProcessor.getJSONData("method", "1200");
 					sendData += "," + userMessageProcessor.getJSONData("id", idTF.getText());
 					sendData += "," + userMessageProcessor.getJSONData("pwd", String.valueOf(pwdTF.getPassword()));
 					sendData += "}";
-					//2. ¼­¹ö·Î º¸³½´Ù.
+					//2. ì„œë²„ë¡œ ë³´ë‚¸ë‹¤.
 					unt.setInputData(sendData);
 					Runnable userInputThread = unt;
 					Thread userThread = new Thread(userInputThread);
@@ -184,7 +184,7 @@ public class SignUpForm implements UserForm{
 		jd.setModal(true);
 		
 		JLabel jl = new JLabel(s);
-		JButton jb = new JButton("È®ÀÎ");
+		JButton jb = new JButton("í™•ì¸");
 		
 		jd.add(jl);
 		jd.add(jb);
@@ -204,9 +204,9 @@ public class SignUpForm implements UserForm{
 		isChecked = value;
 		if(value == true) {
 			inputedId = currentId;
-			getDialog("»ç¿ëÇÒ ¼ö ÀÖ´Â ¾ÆÀÌµğ ÀÔ´Ï´Ù!", 250, 100);
+			getDialog("ì‚¬ìš©í•  ìˆ˜ ìˆëŠ” ì•„ì´ë”” ì…ë‹ˆë‹¤!", 250, 100);
 		} else {
-			getDialog("»ç¿ëÇÒ ¼ö ¾ø´Â ¾ÆÀÌµğ ÀÔ´Ï´Ù!", 250, 100);
+			getDialog("ì‚¬ìš©í•  ìˆ˜ ì—†ëŠ” ì•„ì´ë”” ì…ë‹ˆë‹¤!", 250, 100);
 		}
 	}
 	
