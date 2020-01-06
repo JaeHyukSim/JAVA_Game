@@ -16,19 +16,34 @@ import org.json.simple.parser.ParseException;
 
 public class ServerMessageProcessor {
 	
+	private static volatile ServerMessageProcessor uniqueInstance;
+	
 	private String dataStream;
 	private String head; 
 	private String body; 
 	private String tail;
+	private JSONObject userData;
+	private JSONParser jsonParser;
 	
 	private String filePath;
 	
-	public ServerMessageProcessor() {
+	private ServerMessageProcessor() {
+		jsonParser = new JSONParser();
 		filePath = ServerMessageProcessor.class.getResource("").getPath();
 		dataStream = "";
 		head = "{ \"USER_DATA\" : [";
 		tail = "]}";
 		getFileData();
+	}
+	public static ServerMessageProcessor getInstMessageProcessor() {
+		if(uniqueInstance == null) {
+			synchronized (ServerMessageProcessor.class) {
+				if(uniqueInstance == null) {
+					uniqueInstance = new ServerMessageProcessor();
+				}
+			}
+		}
+		return uniqueInstance;
 	}
 	
 	public String getDataStream() {
@@ -63,7 +78,7 @@ public class ServerMessageProcessor {
 		this.tail = tail;
 	}
 
-	//파일 내용을 body에 집어넣기 + dataStream 완성하기
+	//파일 내용을 userData에 집어넣기
 	public void getFileData() {
 		File file = new File(filePath + "..\\Resource\\ServerResource\\userData.json");
 		
@@ -75,12 +90,17 @@ public class ServerMessageProcessor {
 				String str = "";
 				String tmp = br.readLine();
 				while(tmp != null) {
-					str += tmp;
+					str += tmp + '\n';
 					tmp = br.readLine();
 				}
 				
-				body = str;
 				dataStream = head + body + tail;
+				try {
+					userData = (JSONObject)jsonParser.parse(str);
+				} catch (ParseException e) {
+					System.out.println("ServerMessageProcessor - JSON error : file reading");
+					e.printStackTrace();
+				}
 				br.close();
 			}else {
 				System.out.println("can't approach file");
@@ -97,7 +117,7 @@ public class ServerMessageProcessor {
 		File file = new File(filePath + "..\\..\\src\\Resource\\ServerResource\\userData.json");
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write(body);
+			bw.write(userData.toString());
 			bw.close();
 		}catch(IOException e) {
 			System.out.println("ServerMessageProcessor - IOException");
@@ -131,9 +151,7 @@ public class ServerMessageProcessor {
 			
 			JSONParser jsonParser = new JSONParser();
 			JSONObject jsonObj = (JSONObject)jsonParser.parse(data);
-			JSONParser originalParser = new JSONParser();
-			JSONObject originalObj = (JSONObject)originalParser.parse(dataStream);
-			JSONArray originalArray = (JSONArray)originalObj.get("USER_DATA");
+			JSONArray originalArray = (JSONArray)userData.get("USER_DATA");
 			
 			//2. data의 method를 본다. - method별로 대응을 다르게 한다
 			switch((String)jsonObj.get("method")) {
@@ -184,7 +202,7 @@ public class ServerMessageProcessor {
 						return sendData;
 					}
 				}
-				body += ",\n";
+				body = "";
 				body += "{";
 				body += getJSONData("id", (String)jsonObj.get("id"));
 				body += "," + getJSONData("pwd",(String)jsonObj.get("pwd"));
@@ -195,6 +213,8 @@ public class ServerMessageProcessor {
 				body += "}";
 				dataStream = head + body + tail;
 				System.out.println("body : " + body);
+				JSONObject addedJSON = (JSONObject)jsonParser.parse(body);
+				originalArray.add(addedJSON);
 				setFileData();
 				sendData += getJSONData("method", "1202");
 				sendData += "}";

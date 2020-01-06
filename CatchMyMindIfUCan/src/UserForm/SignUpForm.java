@@ -87,9 +87,18 @@ public class SignUpForm implements UserForm{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				boolean isGoodId = true;
+				for(int i = 0; i < idTF.getText().length(); i++) {
+					char s = idTF.getText().charAt(i);
+					if(!((s >= 'a' && s <= 'z') ||(s >= 'A' && s <= 'Z') || (s >= '0' && s <= '9'))) {
+						isGoodId = false; break;
+					}
+				}
 				if(idTF.getText().equals("")) {
 					//1. dialog 생성
 					getDialog("아이디를 입력하세요", 150, 100);
+				} else if(isGoodId == false) {
+					getDialog("아이디는 대소문자와 숫자의 조합으로만 가능합니다.", 350, 100);
 				}else {
 					currentId = idTF.getText();
 					//1. json data를 만든다.
@@ -199,5 +208,13 @@ public class SignUpForm implements UserForm{
 		} else {
 			getDialog("사용할 수 없는 아이디 입니다!", 250, 100);
 		}
+	}
+	
+	/*
+	 * private JTextField idTF; private JPasswordField pwdTF; private JPasswordField
+	 * pwdOkTF;
+	 */
+	public void dialogClear() {
+		idTF.setText(""); pwdTF.setText(""); pwdOkTF.setText("");
 	}
 }

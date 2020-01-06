@@ -24,7 +24,7 @@ public class ServerFromUser implements Runnable, Observer{
 	}
 
 	public ServerFromUser(Station station, Socket socket) {
-		serverMessageProcessor = new ServerMessageProcessor();
+		serverMessageProcessor = ServerMessageProcessor.getInstMessageProcessor();
 		this.station = station;
 		this.socket = socket;
 		try {

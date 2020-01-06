@@ -165,6 +165,11 @@ public class UserServerInputThread implements Runnable{
 					case "1202":
 						signUpForm.getDialog("회원가입 성공!", 250, 100);
 						signUpForm.setDialLogInvisible();
+						signUpForm.dialogClear();
+						break;
+					case "1204":
+						signUpForm.getDialog("회원가입에 실패했습니다.", 250, 100);
+						signUpForm.dialogClear();
 					}
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
