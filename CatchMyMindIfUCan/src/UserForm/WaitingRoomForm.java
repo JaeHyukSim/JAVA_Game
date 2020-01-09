@@ -180,11 +180,11 @@ public class WaitingRoomForm implements UserForm{
 		roomButton[num].setText("id:"+id+",name:"+name+",state:"+state+",cur:"+cur+",tot:"+tot+",pwdState:"+pwdState);
 		roomButton[num].setVisible(true);
 	}
-	public void makeUserList(String id, String name, String state, int num) {
+	public void makeUserList(String id, String lv, String state, int num) {
 		if(num >= 10) {
 			return;
 		}
-		userButton[num].setText("id:" + id + ",name:"+name+",state:"+state);
+		userButton[num].setText("ID : " + id + " Level : "+lv+" state : "+state);
 		userButton[num].setVisible(true);
 	}
 	public void getChatData(String data) {

@@ -192,6 +192,8 @@ public class ServerMessageProcessor {
 							sendData += "," + getJSONData("ch", (String)((JSONObject)originalArray.get(i)).get("ch"));
 							sendData += "}";
 							
+							sfu.setId((String)((JSONObject)originalArray.get(i)).get("id"));
+							sfu.setLv((String)((JSONObject)originalArray.get(i)).get("lv"));
 							sfu.getStation().unicastObserver(sendData, sfu);
 							return sendData;
 						}else {
@@ -353,7 +355,7 @@ public class ServerMessageProcessor {
 			case "3010":
 				System.out.println("get method : 3010");
 				sendData += getJSONData("method", "3012");
-				sendData += "," + getJSONData("chat", (String)jsonObj.get("chat"));
+				sendData += "," + getJSONData("chat", sfu.getId() + " -> " + (String)jsonObj.get("chat"));
 				sendData += "}";
 				sfu.getStation().broadcastWaitingObserber(sendData);
 				return sendData;
