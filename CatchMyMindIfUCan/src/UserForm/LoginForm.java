@@ -173,6 +173,17 @@ public class LoginForm implements UserForm{
 				public void actionPerformed(ActionEvent e) {
 					displayThread.setBounds(300, 0, 1024,1024);
 					displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
+					
+					
+					//JSON Data
+					String sendData = "{";
+					sendData += userMessageProcessor.getJSONData("method", "2000");
+					sendData += "}";
+					//send to server
+					unt.setInputData(sendData); //unt내부에 있는 sendData라는 변수에 값을 대입한다.
+					Runnable rt = unt;
+					Thread ut = new Thread(rt);
+					ut.start();
 				}
 			});
 			gameStartBtn.setEnabled(false);

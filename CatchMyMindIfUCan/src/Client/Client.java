@@ -8,7 +8,7 @@ public class Client {
 	final static int portNum = 16789;
 	public static void main(String[] args) {
 		try {
-			//adsasd
+			
 			Socket socket;
 			//socket = new Socket("211.238.142.202",portNum);
 			socket = new Socket("localhost", portNum);

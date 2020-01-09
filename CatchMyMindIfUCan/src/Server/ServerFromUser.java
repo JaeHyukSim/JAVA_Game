@@ -14,7 +14,10 @@ public class ServerFromUser implements Runnable, Observer{
 	private ServerMessageProcessor serverMessageProcessor;
 	private String userMessage;
 	private Socket socket;
+	
 	private String id;
+	private String lv;
+	private String state;
 	
 	@Override
 	public String getId() {
@@ -28,6 +31,8 @@ public class ServerFromUser implements Runnable, Observer{
 
 	public ServerFromUser(Station station, Socket socket) {
 		id = "#";
+		lv = "1";
+		state = "1";
 		this.station = station;
 		this.socket = socket;
 		serverMessageProcessor = ServerMessageProcessor.getInstMessageProcessor();
@@ -54,6 +59,8 @@ public class ServerFromUser implements Runnable, Observer{
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
 			station.removeObserver(this);
+			//station.removeRoomUserList(this);
+			station.removeWaitingUser(this);
 			//e.printStackTrace();
 		}
 	}
@@ -76,6 +83,30 @@ public class ServerFromUser implements Runnable, Observer{
 	@Override
 	public void setRegisterStation() {
 		station.registerObserver(this);
+	}
+	@Override
+	public void setWaitingList() {
+		station.registerWaitingUser(this);
+	}
+	@Override
+	public ArrayList<Observer> getWaitingList(){
+		return station.getWaitingList();
+	}
+
+	public String getLv() {
+		return lv;
+	}
+
+	public void setLv(String lv) {
+		this.lv = lv;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 	
 }

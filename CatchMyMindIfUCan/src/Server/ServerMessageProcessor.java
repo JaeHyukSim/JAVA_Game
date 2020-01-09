@@ -113,6 +113,7 @@ public class ServerMessageProcessor {
 			System.out.println("ServerMessageProcessor - file not found");
 		}catch(IOException e) {
 			System.out.println("ServerMessageProcessor - IOException");
+		}finally {
 		}
 	}
 	
@@ -169,11 +170,13 @@ public class ServerMessageProcessor {
 								//2. already log in
 								sendData += getJSONData("method", "1024");
 								sendData += "}";
-								System.out.println("method : 1024" + ", sendData : " + sendData);
+								System.out.println("method:1024" + ",sendData:" + sendData);
 								return sendData;
 							}
 							//3. setId
 							sfu.setId((String)jsonObj.get("id"));
+							//sfu.setLv((String)jsonObj.get("lv"));
+							sfu.setState("waiting");
 							
 							//1. both id and password match - login success
 							sendData += getJSONData("method", "1002");
@@ -182,6 +185,8 @@ public class ServerMessageProcessor {
 							sendData += "," + getJSONData("exp", (String)((JSONObject)originalArray.get(i)).get("exp"));
 							sendData += "," + getJSONData("ch", (String)((JSONObject)originalArray.get(i)).get("ch"));
 							sendData += "}";
+							
+							
 							return sendData;
 						}else {
 						//2. password is wrong - login pwd fail
@@ -236,6 +241,41 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				System.out.println("method to : 1202, sendData ok");
 				return sendData;
+			case "2000":
+				//들어오니까 1. 대기실 유저 목록에 이 유저를 추가한다.
+				
+				//station.registerWaitingUser(sfu);
+				sfu.setWaitingList();
+				
+				ArrayList<Observer> waitingUserList = sfu.getWaitingList();
+				//1. 클라이언트한테 메시지를 보내야 한다 - 메시지 안에는 1. 대기실 유저 정보 list가 포함된다
+				//2. 방 정보도 보내야돼 - 비어있더라도 보내야대 
+				//3. 메소드는 2002 보내면 된다! method, watingUserList[], roomUserList[]
+				
+				sendData += getJSONData("method","2002");
+				sendData += "," + "\"waitingUserList\":[";
+				
+				int i = 0;
+				sendData += "{";
+				sendData += getJSONData("id",waitingUserList.get(i).getId() );
+				sendData += "," + getJSONData("lv",waitingUserList.get(i).getLv() );
+				sendData += "," + getJSONData("state",waitingUserList.get(i).getState() );
+				sendData += "}";
+				
+				for(i = 1; i < waitingUserList.size(); i++) {
+
+					sendData += ",";
+					sendData += "{";
+					sendData += getJSONData("id",waitingUserList.get(i).getId() );
+					sendData += "," + getJSONData("lv",waitingUserList.get(i).getLv() );
+					sendData += "," + getJSONData("state",waitingUserList.get(i).getState() );
+					sendData += "}";
+					sendData += ",";
+				}
+				sendData += "]}";
+				System.out.println(sendData);
+				return sendData;
+				
 			}
 			
 			//3. Make data in the form of transmission

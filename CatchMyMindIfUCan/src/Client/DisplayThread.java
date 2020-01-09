@@ -56,7 +56,6 @@ public class DisplayThread extends JFrame implements Runnable{
 		getContentPane().add(login.getJPanel(), "login");
 		getContentPane().add(waitingRoom.getJPanel(),"waitingRoom");
 		 
-		
 		//exit
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);

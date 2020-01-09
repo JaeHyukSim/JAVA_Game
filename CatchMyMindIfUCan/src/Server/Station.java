@@ -4,9 +4,12 @@ import java.util.ArrayList;
 
 public class Station implements Observable{
 	private ArrayList<Observer> userList;
+	private ArrayList<Observer> waitingUserList;
+	private ArrayList<RoomData> roomUserList;
 	
 	public Station() {
 		userList = new ArrayList<Observer>();
+		waitingUserList = new ArrayList<Observer>();
 		
 	}
 	public void registerObserver(Observer o) {
@@ -38,4 +41,29 @@ public class Station implements Observable{
 	public ArrayList<Observer> getUserList(){
 		return userList;
 	}
+	public ArrayList<Observer> getWaitingList(){
+		return waitingUserList;
+	}
+	public ArrayList<RoomData> getRoomList(){
+		return roomUserList;
+	}
+	public void registerWaitingUser(Observer o) {
+		waitingUserList.add(o);
+	}
+	public void removeWaitingUser(Observer o) {
+		int i = waitingUserList.indexOf(o);
+		if(i != -1) {
+			waitingUserList.remove(i);
+		}
+	}
+	public void registerRoomUserList(RoomData rd) {
+		roomUserList.add(rd);
+	}
+	public void removeRoomUserList(RoomData rd) {
+		int i = roomUserList.indexOf(rd);
+		if(i != -1) {
+			roomUserList.remove(i);
+		}
+	}
+	
 }

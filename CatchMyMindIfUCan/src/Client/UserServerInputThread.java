@@ -174,6 +174,8 @@ public class UserServerInputThread implements Runnable{
 					case "1024": //login - already login : fail
 						signUpForm.getDialog("이미 로그인 중입니다.", 250, 100);
 						break;
+					case "2002": //waiting room - get info
+						System.out.println("^^ 오늘 끝!");
 					}
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
