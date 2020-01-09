@@ -59,7 +59,6 @@ public class ServerFromUser implements Runnable, Observer{
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
 			station.removeObserver(this);
-			//station.removeRoomUserList(this);
 			station.removeWaitingUser(this);
 			//e.printStackTrace();
 		}
@@ -75,7 +74,10 @@ public class ServerFromUser implements Runnable, Observer{
 			e.printStackTrace();
 		}
 	}
-
+	@Override
+	public ArrayList<RoomData> getRoomList(){
+		return station.getRoomList();
+	}
 	@Override
 	public ArrayList<Observer> getUserList() {
 		return station.getUserList();
@@ -108,5 +110,7 @@ public class ServerFromUser implements Runnable, Observer{
 	public void setState(String state) {
 		this.state = state;
 	}
-	
+	public Station getStation() {
+		return station;
+	}
 }

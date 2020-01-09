@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import com.sun.javafx.tk.Toolkit;
 
+import UserForm.GameRoomForm;
 import UserForm.LoginForm;
 import UserForm.UserForm;
 import UserForm.WaitingRoomForm;
@@ -52,9 +53,12 @@ public class DisplayThread extends JFrame implements Runnable{
 		
 		//pushTemp////////////
 		LoginForm login = LoginForm.getInstance(this, socket);
-		WaitingRoomForm waitingRoom = WaitingRoomForm.getInstance(this);
+		WaitingRoomForm waitingRoom = WaitingRoomForm.getInstance(this,socket);
+		GameRoomForm game = GameRoomForm.getInstance(this, socket);
 		getContentPane().add(login.getJPanel(), "login");
 		getContentPane().add(waitingRoom.getJPanel(),"waitingRoom");
+		getContentPane().add(game.getJPanel(),"gameRoom");
+		
 		 
 		//exit
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

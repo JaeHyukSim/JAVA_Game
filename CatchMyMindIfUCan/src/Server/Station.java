@@ -10,6 +10,7 @@ public class Station implements Observable{
 	public Station() {
 		userList = new ArrayList<Observer>();
 		waitingUserList = new ArrayList<Observer>();
+		roomUserList = new ArrayList<RoomData>();
 		
 	}
 	public void registerObserver(Observer o) {

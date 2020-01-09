@@ -149,10 +149,14 @@ public class UserServerInputThread implements Runnable{
 						});
 						break;
 					case "1002": // login ok
-						loginForm.setId((String)jsonObj.get("id"));
-						loginForm.setLv((String)jsonObj.get("lv"));
-						loginForm.setExp((String)jsonObj.get("exp"));
-						loginForm.setCh((String)jsonObj.get("ch"));
+						id = (String)jsonObj.get("id");
+						lv = (String)jsonObj.get("id");
+						exp = (String)jsonObj.get("id");
+						ch = (String)jsonObj.get("id");
+						loginForm.setId(id);
+						loginForm.setLv(lv);
+						loginForm.setExp(exp);
+						loginForm.setCh(ch);
 						loginForm.swapLogin();
 						break;
 					case "1104": //id check is failed
@@ -175,7 +179,12 @@ public class UserServerInputThread implements Runnable{
 						signUpForm.getDialog("이미 로그인 중입니다.", 250, 100);
 						break;
 					case "2002": //waiting room - get info
-						System.out.println("^^ 오늘 끝!");
+						displayThread.setBounds(300, 0, 1440,1024);
+						displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
+						//현재 두개의 데이터를 받은 상태 - 대기실 방 유저들, 방 목록들
+						//1. 대기실 인원 목록을 재설정하는 getWaitingUserList 함수 호출
+						//2. 방 목록을 재설정하는 getGameRoomList 함수 호출
+						break;
 					}
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block

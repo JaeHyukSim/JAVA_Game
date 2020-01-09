@@ -28,6 +28,11 @@ public class ServerMessageProcessor {
 	private JSONObject userData;
 	private JSONParser jsonParser;
 	
+	private RoomData roomData;
+	
+	private ArrayList<Observer> waitingUserList;
+	private ArrayList<RoomData> roomUserList;
+	
 	private String filePath;
 	
 	private ServerMessageProcessor() {
@@ -247,7 +252,7 @@ public class ServerMessageProcessor {
 				//station.registerWaitingUser(sfu);
 				sfu.setWaitingList();
 				
-				ArrayList<Observer> waitingUserList = sfu.getWaitingList();
+				waitingUserList = sfu.getWaitingList();
 				//1. 클라이언트한테 메시지를 보내야 한다 - 메시지 안에는 1. 대기실 유저 정보 list가 포함된다
 				//2. 방 정보도 보내야돼 - 비어있더라도 보내야대 
 				//3. 메소드는 2002 보내면 된다! method, watingUserList[], roomUserList[]
@@ -255,27 +260,50 @@ public class ServerMessageProcessor {
 				sendData += getJSONData("method","2002");
 				sendData += "," + "\"waitingUserList\":[";
 				
-				int i = 0;
-				sendData += "{";
-				sendData += getJSONData("id",waitingUserList.get(i).getId() );
-				sendData += "," + getJSONData("lv",waitingUserList.get(i).getLv() );
-				sendData += "," + getJSONData("state",waitingUserList.get(i).getState() );
-				sendData += "}";
-				
-				for(i = 1; i < waitingUserList.size(); i++) {
-
-					sendData += ",";
+				for(int i = 0; i < waitingUserList.size(); i++) {
 					sendData += "{";
 					sendData += getJSONData("id",waitingUserList.get(i).getId() );
 					sendData += "," + getJSONData("lv",waitingUserList.get(i).getLv() );
 					sendData += "," + getJSONData("state",waitingUserList.get(i).getState() );
 					sendData += "}";
-					sendData += ",";
+					if(i != waitingUserList.size()-1) {
+						sendData += ",";
+					}
+				}
+				//방정보 : 1. 방 제목, 2. 방 id. 3. 비밀번호 여부, 4. 비밀번호, 5. 총 인원, 6. 현재 인원, 7. 게임 상태
+				roomUserList = sfu.getRoomList();
+				sendData += "],\"roomUserList\":[";
+				for(int i = 0; i < roomUserList.size() ; i++) {
+					sendData += "{";
+					sendData += getJSONData("roomId",roomUserList.get(i).getNumberOfRoom() );
+					sendData += "," + getJSONData("roomName",roomUserList.get(i).getNameOfRoom() );
+					sendData += "," + getJSONData("roomPassState",roomUserList.get(i).getRoomPassState() );
+					sendData += "," + getJSONData("roomPass",roomUserList.get(i).getRoomPass() );
+					sendData += "," + getJSONData("roomMaxUser",roomUserList.get(i).getCountOfMaximumUser() );
+					sendData += "," + getJSONData("roomCurUser",roomUserList.get(i).getCountOfCurrentUser() );
+					sendData += "," + getJSONData("roomState",roomUserList.get(i).getRoomState() );
+					sendData += "}";
+					if(i != waitingUserList.size()-1) {
+						sendData += ",";
+					}
 				}
 				sendData += "]}";
 				System.out.println(sendData);
 				return sendData;
+			case "3000":
+				System.out.println("get method : 3000");
+				roomData = new RoomData();
+				roomData.setCountOfCurrentUser("1");
+				roomData.setCountOfMaximumUser("6");
+				roomData.addUserList(sfu);
+				sfu.getStation().registerRoomUserList(roomData);
+				sfu.getStation().removeWaitingUser(sfu);
+				//방 만들면, 
 				
+				sendData+= getJSONData("method", "3002");
+				sendData += "}";
+				System.out.println("send method : 3002");
+				return sendData;
 			}
 			
 			//3. Make data in the form of transmission

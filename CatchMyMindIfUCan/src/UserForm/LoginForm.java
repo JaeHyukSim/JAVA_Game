@@ -171,8 +171,8 @@ public class LoginForm implements UserForm{
 				
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					displayThread.setBounds(300, 0, 1024,1024);
-					displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
+					//displayThread.setBounds(300, 0, 1440,1024);
+					//displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
 					
 					
 					//JSON Data

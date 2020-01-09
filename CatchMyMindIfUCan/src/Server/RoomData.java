@@ -14,26 +14,17 @@ public class RoomData {
 	private String roomState; // 게임중인지 아닌지
 	private String roomPassState; // 비밀번호 boolean
 	
-	private volatile static RoomData uniqueInstance;
-	
-	private RoomData() {
+	public RoomData() {
 		userList = new ArrayList<Observer>();
+		roomPass = "";
 		numberOfRoom = "0";
-		nameOfRoom = "#";
+		nameOfRoom = "default room name!!";
 		countOfCurrentUser = "0";
 		countOfMaximumUser = "0";
 		countOfReadyUser = "0";
 		IdOfMasterUser = "#";
-	}
-	public static RoomData getInstance() {
-		if(uniqueInstance == null) {
-			synchronized (RoomData.class) {
-				if(uniqueInstance == null) {
-					uniqueInstance = new RoomData();
-				}
-			}
-		}
-		return uniqueInstance;
+		roomState = "waiting";
+		roomPassState = "none";
 	}
 	
 	public void addUserList(Observer o) {
