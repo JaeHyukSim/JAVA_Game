@@ -65,20 +65,20 @@ public class WaitingRoomForm implements UserForm{
 		outToLogin = new JButton("로그인으로");
 		
 		//form 위치 지정
-		roomList.setBounds(100, 20, 100, 50);
-		roomCount.setBounds(100, 300, 100, 50);
+		roomList.setBounds(100, 20, 300, 50);
+		roomCount.setBounds(100, 300, 300, 50);
 		for(int i = 0; i < 4; i++) {
-			roomButton[i].setBounds(100, 40 + i*60, 100, 50);
+			roomButton[i].setBounds(100, 40 + i*60, 300, 50);
 		}
-		userList.setBounds(400, 20, 100, 50);
+		userList.setBounds(600, 20, 300, 50);
 		for(int i = 0; i < 10; i++) {
-			userButton[i].setBounds(400, 40 + i*60, 100, 50);
+			userButton[i].setBounds(600, 40 + i*60, 300, 50);
 		}
-		chatArea.setBounds(100, 500, 200, 300);
-		chatField.setBounds(100,820, 150, 50);
-		chatEnter.setBounds(260, 820, 40, 50);
-		makeRoom.setBounds(400, 500, 100, 50);
-		outToLogin.setBounds(400, 570, 100, 50);
+		chatArea.setBounds(100, 500, 500, 300);
+		chatField.setBounds(100,820, 450, 50);
+		chatEnter.setBounds(560, 820, 40, 50);
+		makeRoom.setBounds(700, 500, 100, 50);
+		outToLogin.setBounds(700, 570, 100, 50);
 		
 		jpanel = new JPanel();
 		
@@ -105,6 +105,10 @@ public class WaitingRoomForm implements UserForm{
 		
 		init();
 		
+		//설정
+		chatArea.setEditable(false);
+		
+		//event listener
 		makeRoom.addActionListener(new ActionListener() {
 			
 			@Override
@@ -114,6 +118,24 @@ public class WaitingRoomForm implements UserForm{
 				String sendData = "{";
 				sendData += userMessageProcessor.getJSONData("method", "3000");
 				sendData += "}";
+				System.out.println(sendData);
+				//2. 서버로 보낸다.
+				unt.setInputData(sendData);
+				Runnable userInputThread = unt;
+				Thread userThread = new Thread(userInputThread);
+				userThread.start();
+				
+			}
+		});
+		chatField.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String sendData = "{";
+				sendData += userMessageProcessor.getJSONData("method", "3010");
+				sendData += userMessageProcessor.getJSONData("chat", chatField.getText());
+				sendData += "}";
+				chatField.setText("");
 				System.out.println(sendData);
 				//2. 서버로 보낸다.
 				unt.setInputData(sendData);
@@ -164,5 +186,9 @@ public class WaitingRoomForm implements UserForm{
 		}
 		userButton[num].setText("id:" + id + ",name:"+name+",state:"+state);
 		userButton[num].setVisible(true);
+	}
+	public void getChatData(String data) {
+		System.out.println("chatArea operation");
+		chatArea.setText(chatArea.getText() + "\n" + data);
 	}
 }

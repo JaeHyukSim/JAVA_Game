@@ -214,6 +214,8 @@ public class UserServerInputThread implements Runnable{
 									i);
 						}
 						break;
+					case "3012":
+						waitingRoomForm.getChatData((String)jsonObj.get("chat"));
 					}
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block

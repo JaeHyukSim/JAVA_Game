@@ -350,6 +350,13 @@ public class ServerMessageProcessor {
 				System.out.println(sendData);
 				sfu.getStation().broadcastWaitingObserber(sendData);
 				return sendData;
+			case "3010":
+				System.out.println("get method : 3010");
+				sendData += getJSONData("method", "3012");
+				sendData += "," + getJSONData("chat", (String)jsonObj.get("chat"));
+				sendData += "}";
+				sfu.getStation().broadcastWaitingObserber(sendData);
+				return sendData;
 			}
 			
 			//3. Make data in the form of transmission

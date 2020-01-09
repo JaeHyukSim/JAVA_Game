@@ -59,7 +59,7 @@ public class UserInputThread implements Runnable{
 	public void run() {
 		try {
 			inputData += "\n";
-			outToServer.write(inputData.getBytes("EUC_KR"));
+			outToServer.write(inputData.getBytes("UTF-8"));
 		}catch(IOException e) {
 			System.out.println("UserInputThread IOException error");
 		}
