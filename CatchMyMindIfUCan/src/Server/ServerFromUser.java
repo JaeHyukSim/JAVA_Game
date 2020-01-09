@@ -18,6 +18,7 @@ public class ServerFromUser implements Runnable, Observer{
 	private String id;
 	private String lv;
 	private String state;
+	private String roomId;
 	
 	@Override
 	public String getId() {
@@ -54,7 +55,7 @@ public class ServerFromUser implements Runnable, Observer{
 				System.out.println("userMessage : " + userMessage);
 				userMessage = serverMessageProcessor.processingServerMessage(userMessage, this);
 				//station.broadcastObserver(userMessage);
-				station.unicastObserver(userMessage, this);
+				//station.unicastObserver(userMessage, this);
 			}
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
@@ -113,4 +114,13 @@ public class ServerFromUser implements Runnable, Observer{
 	public Station getStation() {
 		return station;
 	}
+
+	public String getRoomId() {
+		return roomId;
+	}
+
+	public void setRoomId(String roomId) {
+		this.roomId = roomId;
+	}
+	
 }

@@ -24,6 +24,8 @@ public class Station implements Observable{
 		System.out.println("removement operating ...");
 		System.out.println("userCount : " + userList.size());
 	}
+	
+	
 	public void broadcastObserver(String data) {
 		Observer o;
 		for(int i = 0; i < userList.size(); i++) {
@@ -39,6 +41,15 @@ public class Station implements Observable{
 			o.dataSend(data);
 		}
 	}
+	public void broadcastWaitingObserber(String data) {
+		Observer o;
+		for(int i = 0; i < waitingUserList.size(); i++) {
+			o = (Observer)waitingUserList.get(i);
+			o.dataSend(data);
+		}
+	}
+	
+	
 	public ArrayList<Observer> getUserList(){
 		return userList;
 	}

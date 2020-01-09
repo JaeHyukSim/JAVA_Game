@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -19,6 +20,7 @@ import org.json.simple.parser.ParseException;
 import UserForm.LoginForm;
 import UserForm.SignUpForm;
 import UserForm.UserForm;
+import UserForm.WaitingRoomForm;
 import jdk.nashorn.internal.scripts.JD;
 
 public class UserServerInputThread implements Runnable{
@@ -28,10 +30,12 @@ public class UserServerInputThread implements Runnable{
 	private BufferedReader inFromServer;
 	private String inputData;
 	
+	private LoginForm loginForm;
 	private SignUpForm signUpForm;
+	private WaitingRoomForm waitingRoomForm;
+	
 	private JPanel jpanel;
 	private DisplayThread displayThread;
-	private LoginForm loginForm;
 	private JDialog jd;
 	private JButton jb;
 	
@@ -39,6 +43,8 @@ public class UserServerInputThread implements Runnable{
 	private String lv;
 	private String exp;
 	private String ch;
+	
+	private JSONParser jsonParser;
 	
 	public String getId() {
 		return id;
@@ -85,10 +91,15 @@ public class UserServerInputThread implements Runnable{
 	
 	private UserServerInputThread(Socket socket) {
 		try {
-			signUpForm = SignUpForm.getInstance(socket);
+			
 			displayThread = DisplayThread.getInstance(socket);
+			
 			loginForm = LoginForm.getInstance(displayThread, socket);
+			signUpForm = SignUpForm.getInstance(socket);
+			waitingRoomForm = WaitingRoomForm.getInstance(displayThread, socket);
+			
 			jpanel = loginForm.getJPanel();
+			jsonParser = new JSONParser();
 			
 			
 			inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -117,7 +128,6 @@ public class UserServerInputThread implements Runnable{
 		try {
 			while(true) {
 				inputData = inFromServer.readLine();
-				JSONParser jsonParser = new JSONParser();
 				try {
 					JSONObject jsonObj = (JSONObject)jsonParser.parse(inputData);
 					
@@ -184,6 +194,25 @@ public class UserServerInputThread implements Runnable{
 						//현재 두개의 데이터를 받은 상태 - 대기실 방 유저들, 방 목록들
 						//1. 대기실 인원 목록을 재설정하는 getWaitingUserList 함수 호출
 						//2. 방 목록을 재설정하는 getGameRoomList 함수 호출
+						waitingRoomForm.init();
+						JSONArray userList = (JSONArray)jsonObj.get("roomUserList");
+						for(int i = 0; i < userList.size(); i++) {
+							waitingRoomForm.makeRoomList((String)((JSONObject)userList.get(i)).get("roomId"),
+									(String)((JSONObject)userList.get(i)).get("roomName"),
+									(String)((JSONObject)userList.get(i)).get("roomState"),
+									(String)((JSONObject)userList.get(i)).get("roomCurUser"),
+									(String)((JSONObject)userList.get(i)).get("roomMaxUser"),
+									(String)((JSONObject)userList.get(i)).get("roomPass"),
+									(String)((JSONObject)userList.get(i)).get("roomPassState"),
+									i);
+						}
+						userList = (JSONArray)jsonObj.get("waitingUserList");
+						for(int i = 0; i < userList.size(); i++) {
+							waitingRoomForm.makeUserList((String)((JSONObject)userList.get(i)).get("id"),
+									(String)((JSONObject)userList.get(i)).get("lv"),
+									(String)((JSONObject)userList.get(i)).get("state"),
+									i);
+						}
 						break;
 					}
 				} catch (ParseException e) {
