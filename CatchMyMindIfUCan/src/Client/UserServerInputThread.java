@@ -195,6 +195,7 @@ public class UserServerInputThread implements Runnable{
 						//1. 대기실 인원 목록을 재설정하는 getWaitingUserList 함수 호출
 						//2. 방 목록을 재설정하는 getGameRoomList 함수 호출
 						waitingRoomForm.init();
+						
 						JSONArray userList = (JSONArray)jsonObj.get("roomUserList");
 						for(int i = 0; i < userList.size(); i++) {
 							waitingRoomForm.makeRoomList((String)((JSONObject)userList.get(i)).get("roomId"),
