@@ -14,8 +14,10 @@ import javax.swing.JPanel;
 
 import com.sun.javafx.tk.Toolkit;
 
+import UserForm.GameRoomForm;
 import UserForm.LoginFormVer1;
 import UserForm.UserForm;
+import UserForm.WaitingRoomForm;
 
 public class DisplayThread extends JFrame implements Runnable{
 	
@@ -56,16 +58,16 @@ public class DisplayThread extends JFrame implements Runnable{
 		/*
 		 * 여기다가 아래의 주석과 같은 방법으로 추가해 주세요!! 
 		 */
-		//waitingRoom = WaitingRoomForm.getInstance(this,socket);
-		//game = GameRoomForm.getInstance(this, socket);
+		waitingRoom = WaitingRoomForm.getInstance(this,socket);
+		game = GameRoomForm.getInstance(this, socket);
 		
 		//set layout all form
-		login.display();	//waitingRoom.display();	game.display();
+		login.display();	waitingRoom.display();	game.display();
 		
 		//register all form to card
 		getContentPane().add(login.getJPanel(), "login");
-		//getContentPane().add(waitingRoom.getJPanel(),"waitingRoom");
-		//getContentPane().add(game.getJPanel(),"gameRoom");
+		getContentPane().add(waitingRoom.getJPanel(),"waitingRoom");
+		getContentPane().add(game.getJPanel(),"gameRoom");
 		
 		 
 		//exit

@@ -191,4 +191,16 @@ public class WaitingRoomForm implements UserForm{
 		System.out.println("chatArea operation");
 		chatArea.setText(chatArea.getText() + "\n" + data);
 	}
+
+	@Override
+	public void actionPerformMethod() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operation(String data) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -194,12 +194,14 @@ public class ServerMessageProcessor {
 							
 							sfu.setId((String)((JSONObject)originalArray.get(i)).get("id"));
 							sfu.setLv((String)((JSONObject)originalArray.get(i)).get("lv"));
+							System.out.println("method:1002" + ",sendData:" + sendData);
 							sfu.getStation().unicastObserver(sendData, sfu);
 							return sendData;
 						}else {
 						//2. password is wrong - login pwd fail
 						sendData += getJSONData("method", "1014");
 						sendData += "}";
+						System.out.println("method:1014" + ",sendData:" + sendData);
 						sfu.getStation().unicastObserver(sendData, sfu);
 						return sendData;
 						}
@@ -207,6 +209,7 @@ public class ServerMessageProcessor {
 				}
 				sendData += getJSONData("method", "1004");
 				sendData += "}";
+				System.out.println("method:1004" + ",sendData:" + sendData);
 				sfu.getStation().unicastObserver(sendData, sfu);
 				return sendData;
 			case "1100": //Check for duplicates

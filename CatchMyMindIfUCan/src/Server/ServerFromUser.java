@@ -69,7 +69,8 @@ public class ServerFromUser implements Runnable, Observer{
 		
 		try {
 			data += "\n";
-			outToClient.write(data.getBytes("UTF-8"));
+			//outToClient.write(data.getBytes("UTF-8"));
+			outToClient.write(data.getBytes("MS949"));
 		} catch (IOException e) {
 			System.out.println("in ServerFromUser - outToClient write encoding error");
 			e.printStackTrace();
