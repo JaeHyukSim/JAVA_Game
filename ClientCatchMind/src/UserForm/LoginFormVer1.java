@@ -111,6 +111,7 @@ public class LoginFormVer1 implements UserForm{
 		
 		
 		//components들 new 시작!!
+		signUpForm = SignUpForm.getInstance(socket);
 		String loginPanelPath = "..\\Resource\\loginPanelImage2.png";
 		jpanel = displayThread.createJPanel(loginPanelPath);
 
@@ -152,6 +153,8 @@ public class LoginFormVer1 implements UserForm{
 		expl = new JLabel("EXP");
 		expLabel = new JLabel();
 		chLabel = new JLabel();
+		
+		
 		
 		//8.  다음과 같이 Thread를 만들어 줍니다
 		userRunnable = unt;

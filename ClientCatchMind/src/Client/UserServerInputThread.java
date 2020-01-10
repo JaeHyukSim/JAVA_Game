@@ -17,10 +17,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import UserForm.GameRoomForm;
 import UserForm.LoginFormVer1;
 import UserForm.SignUpForm;
 import UserForm.UserForm;
-
+import UserForm.WaitingRoomForm;
 import jdk.nashorn.internal.scripts.JD;
 
 public class UserServerInputThread implements Runnable{
@@ -46,7 +47,8 @@ public class UserServerInputThread implements Runnable{
 			displayThread = DisplayThread.getInstance(socket);
 			
 			loginForm = LoginFormVer1.getInstance(displayThread, socket);
-			
+			waitingRoomForm = WaitingRoomForm.getInstance(displayThread, socket);
+			gameRoomForm = GameRoomForm.getInstance(displayThread, socket);
 			//jpanel = loginForm.getJPanel();
 			jsonParser = new JSONParser();
 			
