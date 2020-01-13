@@ -92,6 +92,16 @@ public class MakeRoom_Dialog extends JDialog implements ActionListener{
 			Runnable r = waitingRoomForm.getUnt();
 			Thread t = new Thread(r);
 			t.start();
+			/*
+			sendData = "{";
+			sendData += (String)userMessageProcessor.getJSONData("method", "3400");
+			sendData += "}";
+			//13. 데이터를 서버로 보냅니다!
+			waitingRoomForm.getUnt().setInputData(sendData);
+			Runnable r2 = waitingRoomForm.getUnt();
+			Thread t1 = new Thread(r2);
+			t1.start();
+			*/
 		}
 	}
 	

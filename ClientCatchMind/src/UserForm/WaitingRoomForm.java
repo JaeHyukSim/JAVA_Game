@@ -169,7 +169,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			
 			switch((String)(jsonObj.get("method"))) {
 			case "2002":
-				displayThread.setBounds(300, 0, 1440,1024);
+				displayThread.setBounds(300, 0, 1446,900);
 				displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
 				// init 함수 구현해서 1. 텍스트에어리어 초기화 2. 텍스트필드초기화
 
@@ -184,6 +184,11 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				//대기방에서 클라이언트 전체화면이 전환되는 상황
 			case "2012":
 				break;
+			case "2224":
+				//room is full - so you can't make new room
+				//추천 : 
+				break;
+			
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
