@@ -29,11 +29,13 @@ public class RoomData {
 	
 	public void addUserList(Observer o) {
 		userList.add(o);
+		countOfCurrentUser = String.valueOf(Integer.parseInt(countOfCurrentUser) + 1);
 	}
 	public void removeUserList(Observer o) {
 		int i = userList.indexOf(o);
 		if(i != -1) {
 			userList.remove(i);
+			countOfCurrentUser = String.valueOf(Integer.parseInt(countOfCurrentUser) - 1);
 		}
 	}
 	public String getNameOfRoom() {
@@ -89,6 +91,14 @@ public class RoomData {
 	}
 	public void setRoomPassState(String roomPassState) {
 		this.roomPassState = roomPassState;
+	}
+
+	public ArrayList<Observer> getUserList() {
+		return userList;
+	}
+
+	public void setUserList(ArrayList<Observer> userList) {
+		this.userList = userList;
 	}
 	
 }

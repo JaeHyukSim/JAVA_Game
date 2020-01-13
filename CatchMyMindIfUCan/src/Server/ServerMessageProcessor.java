@@ -35,7 +35,12 @@ public class ServerMessageProcessor {
 	
 	private String filePath;
 	
+	//Room total info
+	private final int ROOMSIZE;
+			
 	private ServerMessageProcessor() {
+		
+		ROOMSIZE = 30;
 		
 		jsonParser = new JSONParser();
 		filePath = ServerMessageProcessor.class.getResource("").getPath();
@@ -213,7 +218,7 @@ public class ServerMessageProcessor {
 				sfu.getStation().unicastObserver(sendData, sfu);
 				return sendData;
 			case "1100": //Check for duplicates
-				for(int i = 0; i < originalArray.size(); i++) {
+			  	for(int i = 0; i < originalArray.size(); i++) {
 					String dataStreamId = (String)((JSONObject)originalArray.get(i)).get("id");
 					if(dataStreamId.equals(jsonObj.get("id"))){
 						sendData += getJSONData("method", "1104");
@@ -312,7 +317,15 @@ public class ServerMessageProcessor {
 				return sendData;
 			case "3000":
 				System.out.println("get method : 3000");
-				
+				/*
+				if(sfu.getStation().getRoomList().size() >= ROOMSIZE) {
+					sendData += getJSONData("method", "2224");
+					sendData += "}";
+					System.out.println("room is full - method to 2224");
+					sfu.getStation().unicastObserver(sendData, sfu);
+					return sendData;
+				}
+				*/
 				roomData = new RoomData();
 				roomData.setNameOfRoom((String)jsonObj.get("roomCreate"));
 				roomData.setRoomPass((String)jsonObj.get("roomPwd"));
@@ -322,9 +335,21 @@ public class ServerMessageProcessor {
 				}else {
 					roomData.setRoomPassState("1");
 				}
-				roomData.setCountOfCurrentUser("1");
+				roomData.setCountOfCurrentUser("0");
 				roomData.setCountOfMaximumUser("6");
 				roomData.addUserList(sfu);
+				
+				//make room ID
+				roomData.setNumberOfRoom("1029");
+				sfu.setRoomId("1029");
+				/*
+				 * boolean roomExist = false; for(int i = 1; i <= ROOMSIZE; i++) { roomExist =
+				 * false; for(int j = 0; j < sfu.getStation().getRoomList().size(); i++) {
+				 * if(String.valueOf(i).equals(sfu.getStation().getRoomList().get(j).
+				 * getNumberOfRoom())) { roomExist = true; break; } } if(roomExist == false) {
+				 * roomData.setNumberOfRoom(String.valueOf(i)); System.out.println("room num : "
+				 * + i); break; } }
+				 */
 				
 				System.out.println("test operation");
 				//System.out.println(roomData.getRoomPass());
@@ -372,8 +397,42 @@ public class ServerMessageProcessor {
 					}
 				}
 				sendData += "]}";
-				System.out.println(sendData);
+				System.out.println("3400 senddata : " + sendData);
 				sfu.getStation().broadcastWaitingObserber(sendData);
+				return sendData;
+			case "3400":
+				//해당 방은 sfu.getStation().getRoom
+				ArrayList<RoomData> al = sfu.getStation().getRoomList();
+				System.out.println("al size : " + al.size());
+				for(int i = 0; i < al.size(); i++) {
+					System.out.println("sfu.getRoomId() : " + sfu.getRoomId());
+					System.out.println("al.get(i).getNumberOfRoom() : " + al.get(i).getNumberOfRoom());
+					if(sfu.getRoomId().equals(al.get(i).getNumberOfRoom())) {
+						System.out.println("!!!!!!!!!!!!!!!!!!!!!!");
+						//이 데이터를 전송해야 한다. -> RoomData를 가지고 있다 (유저목록만 가져오자)
+						ArrayList<Observer> usr = al.get(i).getUserList();
+						
+						sendData += getJSONData("method", "3402");
+						sendData += ",";
+						sendData += "\"userList\":[";
+						for(int j = 0; j < usr.size(); j++) {
+							sendData += "{";
+							sendData += getJSONData("id", usr.get(i).getId());
+							sendData += "," + getJSONData("lv", usr.get(i).getLv());
+							sendData += "," + getJSONData("ch", usr.get(i).getCh());
+							sendData += "," + getJSONData("exp", usr.get(i).getExp());
+							sendData += "}";
+							if(j != usr.size()-1) {
+								sendData += ",";
+							}
+						}
+						sendData += "]}";
+						break;
+						
+					}
+				}
+				sfu.getStation().unicastObserver(sendData, sfu);
+				sendData += getJSONData("method", "3402 : data : " + sendData);
 				return sendData;
 			}
 			

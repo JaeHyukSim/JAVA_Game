@@ -21,4 +21,16 @@ public interface Observer {
 	
 	public Station getStation();
 	
+	public String getCh();
+
+	public void setCh(String ch);
+
+	public String getCnt();
+
+	public void setCnt(String cnt);
+
+	public String getExp();
+
+	public void setExp(String exp);
+	
 }

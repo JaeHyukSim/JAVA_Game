@@ -7,7 +7,9 @@ public class Station implements Observable{
 	private ArrayList<Observer> waitingUserList;
 	private ArrayList<RoomData> roomUserList;
 	
+	
 	public Station() {
+		
 		userList = new ArrayList<Observer>();
 		waitingUserList = new ArrayList<Observer>();
 		roomUserList = new ArrayList<RoomData>();
@@ -76,6 +78,14 @@ public class Station implements Observable{
 		if(i != -1) {
 			roomUserList.remove(i);
 		}
+	}
+	public RoomData findUserListById(String id) {
+		for(int i = 0; i < roomUserList.size(); i++) {
+			if(roomUserList.get(i).getNumberOfRoom().equals(id)) {
+				return roomUserList.get(i);
+			}
+		}
+		return null;
 	}
 	
 }
