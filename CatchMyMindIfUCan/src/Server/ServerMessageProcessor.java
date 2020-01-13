@@ -303,12 +303,32 @@ public class ServerMessageProcessor {
 				System.out.println(sendData);
 				sfu.getStation().broadcastWaitingObserber(sendData);
 				return sendData;
+			case "2100":
+				System.out.println("get method : 2100");
+				sendData += getJSONData("method", "2102");
+				sendData += "," + getJSONData("chat", sfu.getId() + " -> " + (String)jsonObj.get("chat"));
+				sendData += "}";
+				sfu.getStation().broadcastWaitingObserber(sendData);
+				return sendData;
 			case "3000":
 				System.out.println("get method : 3000");
+				
 				roomData = new RoomData();
+				roomData.setNameOfRoom((String)jsonObj.get("roomCreate"));
+				roomData.setRoomPass((String)jsonObj.get("roomPwd"));
+				roomData.setIdOfMasterUser(sfu.getId());
+				if(roomData.getRoomPass().equals("")) {
+					roomData.setRoomPassState("0");
+				}else {
+					roomData.setRoomPassState("1");
+				}
 				roomData.setCountOfCurrentUser("1");
 				roomData.setCountOfMaximumUser("6");
 				roomData.addUserList(sfu);
+				
+				System.out.println("test operation");
+				//System.out.println(roomData.getRoomPass());
+				//System.out.println((String)roomData.getRoomPass());
 				sfu.getStation().registerRoomUserList(roomData);
 				sfu.getStation().removeWaitingUser(sfu);
 				//방 만들면, 
@@ -353,13 +373,6 @@ public class ServerMessageProcessor {
 				}
 				sendData += "]}";
 				System.out.println(sendData);
-				sfu.getStation().broadcastWaitingObserber(sendData);
-				return sendData;
-			case "2010":
-				System.out.println("get method : 2010");
-				sendData += getJSONData("method", "2012");
-				sendData += "," + getJSONData("chat", sfu.getId() + " -> " + (String)jsonObj.get("chat"));
-				sendData += "}";
 				sfu.getStation().broadcastWaitingObserber(sendData);
 				return sendData;
 			}
