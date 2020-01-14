@@ -17,6 +17,8 @@ import org.json.simple.parser.ParseException;
 
 public class ServerMessageProcessor {
 	
+	private static int tmp = 1;
+	
 	private static volatile ServerMessageProcessor uniqueInstance;
 	
 	private Station station;
@@ -35,7 +37,12 @@ public class ServerMessageProcessor {
 	
 	private String filePath;
 	
+	//Room total info
+	private final int ROOMSIZE;
+			
 	private ServerMessageProcessor() {
+		
+		ROOMSIZE = 30;
 		
 		jsonParser = new JSONParser();
 		filePath = ServerMessageProcessor.class.getResource("").getPath();
@@ -213,7 +220,7 @@ public class ServerMessageProcessor {
 				sfu.getStation().unicastObserver(sendData, sfu);
 				return sendData;
 			case "1100": //Check for duplicates
-				for(int i = 0; i < originalArray.size(); i++) {
+			  	for(int i = 0; i < originalArray.size(); i++) {
 					String dataStreamId = (String)((JSONObject)originalArray.get(i)).get("id");
 					if(dataStreamId.equals(jsonObj.get("id"))){
 						sendData += getJSONData("method", "1104");
@@ -269,59 +276,87 @@ public class ServerMessageProcessor {
 				//2. 방 정보도 보내야돼 - 비어있더라도 보내야대 
 				//3. 메소드는 2002 보내면 된다! method, watingUserList[], roomUserList[]
 				waitingUserList = sfu.getWaitingList();
-				sendData += getJSONData("method","2002");
-				sendData += "," + "\"waitingUserList\":[";
 				
-				for(int i = 0; i < waitingUserList.size(); i++) {
-					sendData += "{";
-					sendData += getJSONData("id",waitingUserList.get(i).getId() );
-					sendData += "," + getJSONData("lv",waitingUserList.get(i).getLv() );
-					sendData += "," + getJSONData("state",waitingUserList.get(i).getState() );
-					sendData += "}";
-					if(i != waitingUserList.size()-1) {
-						sendData += ",";
-					}
-				}
-				//방정보 : 1. 방 제목, 2. 방 id. 3. 비밀번호 여부, 4. 비밀번호, 5. 총 인원, 6. 현재 인원, 7. 게임 상태
-				roomUserList = sfu.getRoomList();
-				sendData += "],\"roomUserList\":[";
-				for(int i = 0; i < roomUserList.size() ; i++) {
-					sendData += "{";
-					sendData += getJSONData("roomId",roomUserList.get(i).getNumberOfRoom() );
-					sendData += "," + getJSONData("roomName",roomUserList.get(i).getNameOfRoom() );
-					sendData += "," + getJSONData("roomPassState",roomUserList.get(i).getRoomPassState() );
-					sendData += "," + getJSONData("roomPass",roomUserList.get(i).getRoomPass() );
-					sendData += "," + getJSONData("roomMaxUser",roomUserList.get(i).getCountOfMaximumUser() );
-					sendData += "," + getJSONData("roomCurUser",roomUserList.get(i).getCountOfCurrentUser() );
-					sendData += "," + getJSONData("roomState",roomUserList.get(i).getRoomState() );
-					sendData += "}";
-					if(i != waitingUserList.size()-1) {
-						sendData += ",";
-					}
-				}
-				sendData += "]}";
-				System.out.println(sendData);
-				sfu.getStation().broadcastWaitingObserber(sendData);
+				
+				sendData = "{";
+				sendData += getJSONData("method", "2002");
+				sendData += "}";
+				
+				System.out.println("::::::::::::::::::::: sendData : " + sendData);
+				sfu.getStation().unicastObserver(sendData, sfu);
+				
+				sendData = method2062(sfu);
+				sfu.getStation().broadcastWaitObserver(sendData);
+				
+				
 				return sendData;
-			case "3000":
+			case "2100":
+				System.out.println("get method : 2100");
+				sendData += getJSONData("method", "2102");
+				sendData += "," + getJSONData("chat", sfu.getId() + " -> " + (String)jsonObj.get("chat"));
+				sendData += "}";
+				sfu.getStation().broadcastWaitObserver(sendData);
+				return sendData;
+			case "2070":
+				sendData = method2062(sfu);
+				sfu.getStation().broadcastObserver(sendData);
+				return sendData;
+			case "3000": // create room
 				System.out.println("get method : 3000");
+				
+				//full room
+				if(sfu.getStation().getRoomUserList().size() >= ROOMSIZE) {
+					sendData += getJSONData("method", "2224");
+					sendData += "}";
+					System.out.println("room is full - method to 2224");
+					sfu.getStation().unicastObserver(sendData, sfu);
+					return sendData;
+				}
+				
+				//create room
 				roomData = new RoomData();
-				roomData.setCountOfCurrentUser("1");
+				roomData.setNameOfRoom((String)jsonObj.get("roomCreate"));
+				roomData.setRoomPass((String)jsonObj.get("roomPwd"));
+				roomData.setIdOfMasterUser(sfu.getId());
+				if(roomData.getRoomPass().equals("")) {
+					roomData.setRoomPassState("0");
+				}else {
+					roomData.setRoomPassState("1");
+				}
+				roomData.setCountOfCurrentUser("0");
 				roomData.setCountOfMaximumUser("6");
 				roomData.addUserList(sfu);
-				sfu.getStation().registerRoomUserList(roomData);
-				sfu.getStation().removeWaitingUser(sfu);
+				
+				//make room ID
+				for(int i = 1; i <= ROOMSIZE; i++) {
+					int index = sfu.getStation().findRoomObserver(String.valueOf(i));
+					if(index == -1) {
+						roomData.setNumberOfRoom(String.valueOf(i));
+						sfu.setRoomId(String.valueOf(i));
+						System.out.println("room number : " + i);
+						break;
+					}
+				}
+				
+				
+				sfu.getStation().registerRoomObserver(roomData);
+				sfu.getStation().removeWaitObserver(sfu);
 				//방 만들면, 
-				
-				sendData+= getJSONData("method", "3002");
+				//1. dialog 제거
+				sendData += getJSONData("method", "2052");
 				sendData += "}";
-				System.out.println("send method : 3002");
-				
 				sfu.getStation().unicastObserver(sendData, sfu);
 				
 				sendData = "{";
+				sendData+= getJSONData("method", "3002");
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, sfu);
+				
 				waitingUserList = sfu.getWaitingList();
-				sendData += getJSONData("method","2002");
+				
+				//update data of all users
+				sendData = "{";
+				sendData += getJSONData("method","2062");
 				sendData += "," + "\"waitingUserList\":[";
 				
 				for(int i = 0; i < waitingUserList.size(); i++) {
@@ -352,15 +387,41 @@ public class ServerMessageProcessor {
 					}
 				}
 				sendData += "]}";
-				System.out.println(sendData);
-				sfu.getStation().broadcastWaitingObserber(sendData);
+				sfu.getStation().broadcastWaitObserver(sendData);
 				return sendData;
-			case "2010":
-				System.out.println("get method : 2010");
-				sendData += getJSONData("method", "2012");
-				sendData += "," + getJSONData("chat", sfu.getId() + " -> " + (String)jsonObj.get("chat"));
-				sendData += "}";
-				sfu.getStation().broadcastWaitingObserber(sendData);
+			case "3400": // init room
+				//해당 방은 sfu.getStation().getRoom
+				ArrayList<RoomData> al = sfu.getStation().getRoomUserList();
+				System.out.println("al size : " + al.size());
+				for(int i = 0; i < al.size(); i++) {
+					System.out.println("sfu.getRoomId() : " + sfu.getRoomId());
+					System.out.println("al.get(i).getNumberOfRoom() : " + al.get(i).getNumberOfRoom());
+					if(sfu.getRoomId().equals(al.get(i).getNumberOfRoom())) {
+						System.out.println("!!!!!!!!!!!!!!!!!!!!!!");
+						//이 데이터를 전송해야 한다. -> RoomData를 가지고 있다 (유저목록만 가져오자)
+						ArrayList<Observer> usr = al.get(i).getUserList();
+						
+						sendData += getJSONData("method", "3402");
+						sendData += ",";
+						sendData += "\"userList\":[";
+						for(int j = 0; j < usr.size(); j++) {
+							sendData += "{";
+							sendData += getJSONData("id", usr.get(i).getId());
+							sendData += "," + getJSONData("lv", usr.get(i).getLv());
+							sendData += "," + getJSONData("ch", usr.get(i).getCh());
+							sendData += "," + getJSONData("exp", usr.get(i).getExp());
+							sendData += "}";
+							if(j != usr.size()-1) {
+								sendData += ",";
+							}
+						}
+						sendData += "]}";
+						break;
+						
+					}
+				}
+				sfu.getStation().unicastObserver(sendData, sfu);
+				sendData += getJSONData("method", "3402 : data : " + sendData);
 				return sendData;
 			}
 			
@@ -386,4 +447,39 @@ public class ServerMessageProcessor {
 		return false;
 	}
 	
+	public String method2062(ServerFromUser sfu) {
+		String sendData = "{";
+		sendData += getJSONData("method","2062");
+		sendData += "," + "\"waitingUserList\":[";
+		
+		for(int i = 0; i < waitingUserList.size(); i++) {
+			sendData += "{";
+			sendData += getJSONData("id",waitingUserList.get(i).getId() );
+			sendData += "," + getJSONData("lv",waitingUserList.get(i).getLv() );
+			sendData += "," + getJSONData("state",waitingUserList.get(i).getState() );
+			sendData += "}";
+			if(i != waitingUserList.size()-1) {
+				sendData += ",";
+			}
+		}
+		//방정보 : 1. 방 제목, 2. 방 id. 3. 비밀번호 여부, 4. 비밀번호, 5. 총 인원, 6. 현재 인원, 7. 게임 상태
+		roomUserList = sfu.getRoomList();
+		sendData += "],\"roomUserList\":[";
+		for(int i = 0; i < roomUserList.size() ; i++) {
+			sendData += "{";
+			sendData += getJSONData("roomId",roomUserList.get(i).getNumberOfRoom() );
+			sendData += "," + getJSONData("roomName",roomUserList.get(i).getNameOfRoom() );
+			sendData += "," + getJSONData("roomPassState",roomUserList.get(i).getRoomPassState() );
+			sendData += "," + getJSONData("roomPass",roomUserList.get(i).getRoomPass() );
+			sendData += "," + getJSONData("roomMaxUser",roomUserList.get(i).getCountOfMaximumUser() );
+			sendData += "," + getJSONData("roomCurUser",roomUserList.get(i).getCountOfCurrentUser() );
+			sendData += "," + getJSONData("roomState",roomUserList.get(i).getRoomState() );
+			sendData += "}";
+			if(i != waitingUserList.size()-1) {
+				sendData += ",";
+			}
+		}
+		sendData += "]}";
+		return sendData;
+	}
 }

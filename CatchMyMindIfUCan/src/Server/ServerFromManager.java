@@ -7,11 +7,11 @@ import java.io.InputStreamReader;
 
 public class ServerFromManager implements Runnable{
 	private BufferedReader inFromManager;
-	private Station station;
+	private MegaStation station;
 	private String managerMessage;
 	private ServerMessageProcessor serverMessageProcessor;
 	
-	public ServerFromManager(Station station) {
+	public ServerFromManager(MegaStation station) {
 		this.station = station;
 		serverMessageProcessor = ServerMessageProcessor.getInstMessageProcessor();
 		inFromManager = new BufferedReader(new InputStreamReader(System.in));

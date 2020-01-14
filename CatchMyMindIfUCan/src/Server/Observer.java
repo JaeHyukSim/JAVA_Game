@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public interface Observer {
 	public void dataSend(String data);
+	
 	public String getId();
 	public void setId(String s);
 	
@@ -19,6 +20,18 @@ public interface Observer {
 	public String getState();
 	public void setState(String state);
 	
-	public Station getStation();
+	public MegaObserverble getStation();
+	
+	public String getCh();
+
+	public void setCh(String ch);
+
+	public String getCnt();
+
+	public void setCnt(String cnt);
+
+	public String getExp();
+
+	public void setExp(String exp);
 	
 }

@@ -1,241 +1,336 @@
 package UserForm;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.Label;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.Socket;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import Client.DisplayThread;
 import Client.UserInputThread;
 import Client.UserMessageProcessor;
 
-public class GameRoomForm implements UserForm{
+
+
+public class GameRoomForm extends JPanel implements UserForm{ 
 	
-	private JPanel grp;
+	///***** 모르는 것 - 질문하셔도 좋고, 제가 만든 LoginFormVer1을 참고하셔도 됩니다! - 똑같은 형태로 적용했습니다!
 	
-	private volatile static GameRoomForm uniqueInstance; 
-	
-	private UserMessageProcessor userMessageProcessor;	// message를 json으로 변환시켜주는 클래스
-	private DisplayThread displayThread;				// jframe의 컨테이너, 우리가 만든 gameroom panel을 여기에 add
-	private Socket socket;								// 통신 소켓
-	private UserInputThread unt;						// message를 서버로 보내는 thread
-	
-	private JPanel grSketch;
-	private JPanel[] userPanel;
-	private JPanel exp;
-	private JPanel timer;
-	private JPanel turn;
-	private JPanel answer;
-	private JPanel round;
-	//JButton b1,b2,b3,b4;
-	private JButton[] b;
-	private JPanel p;
-	private Label[] label;	
-	private JTextField tf;
-	private JProgressBar jb;
-	
-	private GameRoomForm(DisplayThread ds, Socket socket) {
+		//1. UserForm 인터페이스를 implements합니다!!!!!
+		//2. Override 함수들을 만들어서 에러를 없애줍니다!!!!
+		//3. Singleton Pattern을 만들기 위해 uniqueInstance 변수를 만들어 줍니다!!!!!
+		private volatile static GameRoomForm uniqueInstance;
+		//4. 필수 변수들을 선언해 줍니다!!!!!
+		private UserMessageProcessor userMessageProcessor;
+		private DisplayThread displayThread;
+		private Socket socket;
+		private UserInputThread unt;
+		private JSONParser jsonParser;
+		//5. 사용할 JFrame container의 components들과 Thread를 선언해 줍니다!!!!
+		
+   //색상
+   //프레임
+   Color color = new Color(175,238,238);
+   //패널/라벨/테두리
+   Color colorout = new Color(95,158,160);
+   Color colorin = new Color(175,238,238);
+    //경험치바
+   Color colorExp = new Color(255,255,255);
+   // 채팅 표시할 텍스트 필드 선언
+   public UserChat[] userChat = new UserChat[6];
+   // 채팅 표시 위한 패널별 유저 넘버. 임시로 0.
+   int userNum = 0;
+   
+   JPanel grSketch = new JPanel();
+   JPanel[] userPanel = new JPanel[6];
+   JPanel exp = new JPanel();
+   JPanel timer = new JPanel();
+   JPanel turn = new JPanel();
+   JPanel answer = new JPanel();
+   JPanel round = new JPanel();
+   JButton[] b = new JButton[4];
+   JPanel p = new JPanel();
+   Label[] label = new Label[24];
+   Font font = new Font("Black Han Sans",Font.PLAIN,30);
+   //정답폰트
+   Font font2 = new Font("Black Han Sans",Font.PLAIN,30);
+   JTextField tf=new JTextField();
+   JProgressBar jb;
+   
+ //9. Singleton pattern의 유일한 instance를 만들기 위해 getInstance()메소드를 만듭니다.
+ 	public static GameRoomForm getInstance(DisplayThread dt, Socket socket) {
+ 		if(uniqueInstance == null) {
+ 			synchronized (GameRoomForm.class) {
+ 				if(uniqueInstance == null) {
+ 					uniqueInstance = new GameRoomForm(dt, socket);
+ 				}
+ 			}
+ 		}
+ 		return uniqueInstance;
+ 	}
+ 	
+   private GameRoomForm(DisplayThread dt, Socket socket){
+      
+	   this.displayThread = dt;
 		this.socket = socket;
-		unt = UserInputThread.getInstance(socket);
 		userMessageProcessor = new UserMessageProcessor();
-		this.displayThread = ds;
+		unt = UserInputThread.getInstance(socket);
+		jsonParser = new JSONParser();
 		
-		grp = new JPanel();
-		grp.setSize(1446, 824);
+      setLayout(null);
+      
+      // 채팅 표시할 텍스트 필드 할당
+      for(int i=0; i<6; i++) {
+    	  userChat[i] = new UserChat(i);
+    	  add(userChat[i]);
+      }
+      
+      //1. 스케치북      
+      grSketch.setBounds(280, 15, 880, 600);
+      grSketch.setBackground(Color.white);
+      add(grSketch);
+      
+      //2. 유저패널   
+      for(int i=0; i<6; i++) {
+         userPanel[i] = new JPanel();
+         userPanel[i].setBackground(colorout);
+      }
+      for(int i=0; i<3; i++) {
+         userPanel[i].setLayout(null);
+         userPanel[i].setBounds(15, 15+(205*i), 250, 190);      
+         add(userPanel[i]);
+      }
+      for(int i=3; i<6; i++) {
+         userPanel[i].setLayout(null);
+         userPanel[i].setBounds(1175, 15+(205*(i-3)), 250, 190);
+         add(userPanel[i]);
+      }
+      
+      // 라벨
+      for (int i = 0; i < 6; i++) {
+               
+         label[i] = new Label("");         
+         label[i].setBounds(10, 10, 130, 170);
+         label[i].setBackground(colorin);
+         label[i].setText("");
+         userPanel[i].add(label[i]);
+               
+         label[6+i] = new Label("");         
+         label[6+i].setBounds(145, 10, 95, 60);
+         label[6+i].setBackground(colorin);
+         label[6+i].setText("");
+         userPanel[i].add(label[6+i]);
+               
+         label[12+i] = new Label("");         
+         label[12+i].setBounds(145, 75, 95, 50);
+         label[12+i].setBackground(colorin);
+         label[12+i].setText("");
+         userPanel[i].add(label[12+i]);
+         
+         label[18+i] = new Label("");         
+         label[18+i].setBounds(145, 130, 95, 50   );
+         label[18+i].setBackground(colorin);
+         label[18+i].setText("");
+         userPanel[i].add(label[18+i]);
+      }
+      
+      //3.라운드표시기
+      timer.setBounds(15, 630, 250, 150);
+      timer.setBackground(color);
+      //테두리(타이틀)
+      Border one =  BorderFactory.createTitledBorder(new LineBorder(colorout,3),"라운드");
+      //타이틀(중앙정렬)
+      ((TitledBorder) one).setTitleJustification(TitledBorder.CENTER);
+      //타이틀(폰트,글자색상)
+      ((TitledBorder) one).setTitleFont(font);
+      ((TitledBorder) one).setTitleColor(colorout);
+      //테두리
+      timer.setBorder(one);
+      add(timer);
+      
+      //4.차례표시기
+      turn.setBounds(280, 630, 250, 105);
+      turn.setBackground(color);
+      Border two =  BorderFactory.createTitledBorder(new LineBorder(colorout,3),"출제 순서");
+      ((TitledBorder) two).setTitleJustification(TitledBorder.CENTER);
+      ((TitledBorder) two).setTitleFont(font);
+      ((TitledBorder) two).setTitleColor(colorout);
+      turn.setBorder(two);
+      add(turn);
+      
+      //5.정답표시기      
+      answer.setBounds(545, 630, 250, 105);
+      answer.setBackground(color);
+      Border thr =  BorderFactory.createTitledBorder(new LineBorder(colorout,3),"글자수");
+      ((TitledBorder) thr).setTitleJustification(TitledBorder.CENTER);
+      ((TitledBorder) thr).setTitleFont(font);
+      ((TitledBorder) thr).setTitleColor(colorout);
+       answer.setBorder(thr);
+      
+      Label label = new Label(); 
+      label.setBounds(0, 0, 250, 50);
+      label.setFont(font2);
+       
+      add(answer);
+      answer.add(label);
+      
+      //6.채팅      
+      tf.setBounds(810, 710, 350, 30);
+      tf.addActionListener(new ActionListener() {
 		
-		grSketch = new JPanel();
-		userPanel = new JPanel[6];
-		exp = new JPanel();
-		timer = new JPanel();
-		turn = new JPanel();
-		answer = new JPanel();
-		round = new JPanel();
-		//JButton b1,b2,b3,b4;
-		b = new JButton[4];
-		p = new JPanel();
-		label = new Label[24];	
-		
-		grp.setLayout(null);
-		
-		tf=new JTextField();
-		
-		for(int i=0; i<1; i++) {
-			b[i] = new JButton("게임준비");
-			b[i+1] = new JButton("게임초대");
-			b[i+2] = new JButton("친구추가");
-			b[i+3] = new JButton("나가기");
-		}
-		/*
-		 * b1=new JButton("게임준비"); 
-		 * b2=new JButton("게임초대"); 
-		 * b3=new JButton("친구추가");
-		 * b4=new JButton("나가기");
-		 */
-		
-		//1. 스케치북		
-		grSketch.setBounds(280, 15, 880, 600);
-		grSketch.setBackground(Color.BLACK);
-		grp.add(grSketch);
-		
-		//2. 유저패널		
-		for(int i=0; i<6; i++) {
-			userPanel[i] = new JPanel();
-			userPanel[i].setBackground(Color.BLACK);
-		}
-		for(int i=0; i<3; i++) {
-			userPanel[i].setLayout(null);
-			userPanel[i].setBounds(15, 15+(205*i), 250, 190);
-			grp.add(userPanel[i]);
-		}
-		for(int i=3; i<6; i++) {
-			userPanel[i].setLayout(null);
-			userPanel[i].setBounds(1175, 15+(205*(i-3)), 250, 190);
-			grp.add(userPanel[i]);
-		}
-		
-		//3.라운드표시기
-		timer.setBounds(15, 630, 250, 150);
-		timer.setBackground(Color.gray);
-		grp.add(timer);
-		
-		//4.차례표시기
-		turn.setBounds(280, 630, 250, 105);
-		turn.setBackground(Color.pink);
-		grp.add(turn);
-		
-		//5.정답글자수표시기		
-		answer.setBounds(545, 630, 250, 105);
-		answer.setBackground(Color.yellow);
-		grp.add(answer);
-		
-		//7.타이머		
-		round.setBounds(810, 630, 350, 70);
-		round.setLayout(null);
-		round.setBackground(Color.blue);
-		grp.add(round);
-		
-		//6.채팅		
-		tf.setBounds(810, 710, 350, 30);
-		grp.add(tf);
-				
-		//8.경험치바
-		/*
-		 * exp.setBounds(280, 750, 880, 30); 
-		 * exp.setBackground(Color.black);
-		 * grp.add(exp);
-		 */
-		jb = new JProgressBar(0,100);
-		jb.setBounds(280, 750, 880, 30);
-		jb.setValue(0);
-		jb.setStringPainted(true);
-		grp.add(jb);
-		
-		
-		
-		//버튼					
-		p.setLayout(new GridLayout(4,1,0,10));
-		/*
-		 * p.add(b1);p.add(b2); p.add(b3); p.add(b4); 
-		 * //b1. 게임준비
-		 * b1.setBackground(Color.white); 
-		 * //b2. 게임초대 
-		 * b2.setBackground(Color.white);
-		 * //b3. 친구추가 
-		 * b3.setBackground(Color.white); 
-		 * //b4. 나가기
-		 * b4.setBackground(Color.white);
-		 */
-		p.setBounds(1175, 630, 250, 150);
-		grp.add(p);
-		
-		for(int i=0; i<1; i++) {
-			b[i] = new JButton("게임준비");
-			b[i+1] = new JButton("게임초대");
-			b[i+2] = new JButton("친구추가");
-			b[i+3] = new JButton("나가기");
-		}
-		
-		for (int i=0;i<1;i++)
-		{  
-			p.add(b[i]);      b[i].setBackground(Color.white);		
-			p.add(b[i+1]);    b[i+1].setBackground(Color.white);
-			p.add(b[i+2]);    b[i+2].setBackground(Color.white);
-			p.add(b[i+3]);    b[i+3].setBackground(Color.white);
-		}
-		
-		// 라벨
-				for (int i = 0; i < 6; i++) {
-					label[i] = new Label("아바타");			
-					label[i].setBounds(10, 15, 120, 160);
-					label[i].setBackground(Color.white);
-					userPanel[i].add(label[i]);
-					
-					label[6+i] = new Label("Id");			
-					label[6+i].setBounds(135, 15, 105, 50);
-					label[6+i].setBackground(Color.white);
-					userPanel[i].add(label[6+i]);
-					
-					label[12+i] = new Label("Level");			
-					label[12+i].setBounds(135, 70, 105, 50);
-					label[12+i].setBackground(Color.white);
-					userPanel[i].add(label[12+i]);
-					
-					label[18+i] = new Label("정답수");			
-					label[18+i].setBounds(135, 125, 105, 50);
-					label[18+i].setBackground(Color.white);
-					userPanel[i].add(label[18+i]);
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(e.getSource()==tf) {
+				String message = tf.getText();
+				if(message.length()>10) {
+					message = message.substring(0, 10);
 				}
-				
-		//b[0]. 게임준비 액션
-		b[0].setBackground(Color.white);
-		b[0].addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		
-		//displayThread.add(grp);
-	}
-	
-	public static GameRoomForm getInstance(DisplayThread ds,Socket socket) {
-		if(uniqueInstance == null) {
-			synchronized (GameRoomForm.class) {
-				if(uniqueInstance == null) {
-					uniqueInstance = new GameRoomForm(ds, socket);
-				}
+				userChat[userNum].printChat(message);
+				tf.setText("");
 			}
 		}
-		return uniqueInstance;
+	});
+      add(tf);
+      
+      //7.타이머
+      TimeBar timeBar = new TimeBar(120);
+      round.setBounds(810, 630, 350, 70);
+      round.setLayout(null);
+      round.setBackground(color);
+      round.add(timeBar);
+      timeBar.setEnabled(true);
+      Border four =  BorderFactory.createTitledBorder(new LineBorder(colorout,3),"타이머");
+      ((TitledBorder) four).setTitleJustification(TitledBorder.CENTER);
+      ((TitledBorder) four).setTitleFont(font);
+      ((TitledBorder) four).setTitleColor(colorout);
+       round.setBorder(four);
+      add(round);
+      
+      //8.경험치바
+      jb = new JProgressBar(0,100);
+      jb.setBounds(280, 750, 880, 30);
+      jb.setValue(0);
+      jb.setStringPainted(true);
+      jb.setBackground(colorExp);
+      jb.setBorderPainted(false);
+      add(jb);
+      
+      //9.버튼               
+      p.setLayout(new GridLayout(4,1,0,10));
+      p.setBounds(1175, 630, 250, 150);
+      p.setBackground(color);
+      add(p);
+      
+      for(int i=0; i<1; i++) {
+         b[i] = new JButton("게임준비");
+         b[i+1] = new JButton("게임초대");
+         b[i+2] = new JButton("친구추가");
+         b[i+3] = new JButton("나가기");
+      }
+      
+      // 테스트 위해 임시로 만든 버튼 액션
+      b[0].addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			Thread t = new Thread(timeBar);
+			t.start();
+		}
+	});
+      
+      for (int i=0;i<1;i++)
+      {  
+         p.add(b[i]);
+         b[i].setFont(font);
+         //외곽선 false - 미사용         
+         b[i].setBorderPainted(false);
+         //선택시 테두리 false - 미사용 
+         b[i].setFocusPainted(false);
+         b[i].setBackground(color);      
+         b[i].setForeground(colorout);
+         
+         p.add(b[i+1]);
+         b[i+1].setFont(font);
+         b[i+1].setBorderPainted(false);
+         b[i+1].setFocusPainted(false);
+         b[i+1].setBackground(color);
+         b[i+1].setForeground(colorout);
+         
+         p.add(b[i+2]);
+         b[i+2].setFont(font);
+         b[i+2].setBorderPainted(false);
+         b[i+2].setFocusPainted(false);
+         b[i+2].setBackground(color);
+         b[i+2].setForeground(colorout);
+         
+         p.add(b[i+3]);
+         b[i+3].setFont(font);
+         b[i+3].setBorderPainted(false);
+         b[i+3].setFocusPainted(false);
+         b[i+3].setBackground(color);
+         b[i+3].setForeground(colorout);
+      }
+      
+   }
+
+   private Object String(String[] answer2) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+@Override
+public void display() {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void actionPerformMethod() {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void operation(java.lang.String data) {
+	// TODO Auto-generated method stub
+	try {
+		JSONObject jsonObj = ((JSONObject)jsonParser.parse(data));
+		switch((String)(jsonObj.get("method"))) {
+		case "3002":
+			displayThread.setBounds(300, 0, 1446,900);
+			displayThread.getCardLayout().show(displayThread.getContentPane(), "gameRoom");
+			break;
+		case "3402":
+			System.out.println("get method 3402");
+			JSONArray usr = (JSONArray)jsonObj.get("userList");
+			for(int i = 0; i < usr.size(); i++) {
+				label[i].setText(String.valueOf(((JSONObject)usr.get(i)).get("ch")));
+				label[i+6].setText(String.valueOf(((JSONObject)usr.get(i)).get("id")));
+				label[i+12].setText(String.valueOf(((JSONObject)usr.get(i)).get("lv")));
+				label[i+18].setText("0");
+			}
+			break;
+		}
+	}catch(Exception e) {
+		
 	}
 	
-	@Override
-	public void display() {
-		
-	}
+}
 
-	@Override
-	public JPanel getJPanel() {
-		// TODO Auto-generated method stub
-		return grp;
-	}
+@Override
+public JPanel getJPanel() {
+	// TODO Auto-generated method stub
+	return this;
+}
 
-	@Override
-	public void actionPerformMethod() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void operation(String data) {
-		// TODO Auto-generated method stub
-		
-	}
 }

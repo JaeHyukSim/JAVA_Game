@@ -7,14 +7,14 @@ import java.net.Socket;
 public class ServerConnectThread implements Runnable{
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private Station station;
+	private MegaStation station;
 	private final int portNum = 16789;
 	
 	public ServerConnectThread() {
 		try {
 			System.out.println("server is connected...");
 			
-			station = new Station();
+			station = new MegaStation();
 			serverSocket = new ServerSocket(portNum);
 			
 			Runnable serverManager = new ServerFromManager(station);

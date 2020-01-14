@@ -10,15 +10,22 @@ import java.util.ArrayList;
 public class ServerFromUser implements Runnable, Observer{
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
-	private Station station;
+	private MegaStation station;
 	private ServerMessageProcessor serverMessageProcessor;
 	private String userMessage;
 	private Socket socket;
 	
 	private String id;
 	private String lv;
+	private String exp;
+	private String ch;
+	
 	private String state;
 	private String roomId;
+	private String readyState;
+
+	private String cnt;
+
 	
 	@Override
 	public String getId() {
@@ -30,10 +37,16 @@ public class ServerFromUser implements Runnable, Observer{
 		this.id = id;
 	}
 
-	public ServerFromUser(Station station, Socket socket) {
+	public ServerFromUser(MegaStation station, Socket socket) {
 		id = "#";
 		lv = "1";
 		state = "1";
+		roomId = "0";
+		readyState = "0";
+		exp = "123";
+		lv = "2";
+		ch = "2";
+		
 		this.station = station;
 		this.socket = socket;
 		serverMessageProcessor = ServerMessageProcessor.getInstMessageProcessor();
@@ -47,6 +60,14 @@ public class ServerFromUser implements Runnable, Observer{
 		}
 	}
 	
+	public String getReadyState() {
+		return readyState;
+	}
+
+	public void setReadyState(String readyState) {
+		this.readyState = readyState;
+	}
+
 	@Override
 	public void run() {
 		try {
@@ -54,13 +75,22 @@ public class ServerFromUser implements Runnable, Observer{
 				userMessage = inFromClient.readLine();
 				System.out.println("userMessage : " + userMessage);
 				userMessage = serverMessageProcessor.processingServerMessage(userMessage, this);
-				//station.broadcastObserver(userMessage);
-				//station.unicastObserver(userMessage, this);
 			}
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
 			station.removeObserver(this);
-			station.removeWaitingUser(this);
+			station.removeWaitObserver(this);
+			
+			System.out.println("delete operation : room id : " + roomId);
+			if(roomId.equals("0") == false) {
+				System.out.println("delete operation ok! remove room target!");
+				station.removeRoomObserverTarget(roomId, this);
+				String tmp = "{\"method\":\"2070\"}";
+				tmp = serverMessageProcessor.processingServerMessage(tmp, this);
+			}
+			//방에 있었다면, 제거한다
+			//removeUserFromRoom();
+			
 			//e.printStackTrace();
 		}
 	}
@@ -78,7 +108,7 @@ public class ServerFromUser implements Runnable, Observer{
 	}
 	@Override
 	public ArrayList<RoomData> getRoomList(){
-		return station.getRoomList();
+		return station.getRoomUserList();
 	}
 	@Override
 	public ArrayList<Observer> getUserList() {
@@ -90,11 +120,11 @@ public class ServerFromUser implements Runnable, Observer{
 	}
 	@Override
 	public void setWaitingList() {
-		station.registerWaitingUser(this);
+		station.registerWaitObserver(this);
 	}
 	@Override
 	public ArrayList<Observer> getWaitingList(){
-		return station.getWaitingList();
+		return station.getWaitUserList();
 	}
 
 	public String getLv() {
@@ -112,7 +142,7 @@ public class ServerFromUser implements Runnable, Observer{
 	public void setState(String state) {
 		this.state = state;
 	}
-	public Station getStation() {
+	public MegaObserverble getStation() {
 		return station;
 	}
 
@@ -123,5 +153,30 @@ public class ServerFromUser implements Runnable, Observer{
 	public void setRoomId(String roomId) {
 		this.roomId = roomId;
 	}
+
+	public String getCh() {
+		return ch;
+	}
+
+	public void setCh(String ch) {
+		this.ch = ch;
+	}
+
+	public String getCnt() {
+		return cnt;
+	}
+
+	public void setCnt(String cnt) {
+		this.cnt = cnt;
+	}
+
+	public String getExp() {
+		return exp;
+	}
+
+	public void setExp(String exp) {
+		this.exp = exp;
+	}
+	
 	
 }
