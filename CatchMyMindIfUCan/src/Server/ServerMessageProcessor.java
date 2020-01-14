@@ -41,11 +41,11 @@ public class ServerMessageProcessor {
 	private final int ROOMSIZE;
 			
 	private ServerMessageProcessor() {
-		
 		ROOMSIZE = 30;
 		
 		jsonParser = new JSONParser();
 		filePath = ServerMessageProcessor.class.getResource("").getPath();
+		System.out.println("FILEPATH : " + filePath);
 		dataStream = "";
 		head = "{ \"USER_DATA\" : [";
 		tail = "]}";
@@ -96,7 +96,7 @@ public class ServerMessageProcessor {
 
 	//put to variable 'userData' from File
 	public void getFileData() {
-		File file = new File(filePath + "..\\Resource\\ServerResource\\userData.json");
+		File file = new File(filePath + "..\\..\\src\\Resource\\ServerResource\\userData.json");
 		
 		try {
 			if(isOkFile(file)) {
@@ -275,7 +275,6 @@ public class ServerMessageProcessor {
 				//1. 클라이언트한테 메시지를 보내야 한다 - 메시지 안에는 1. 대기실 유저 정보 list가 포함된다
 				//2. 방 정보도 보내야돼 - 비어있더라도 보내야대 
 				//3. 메소드는 2002 보내면 된다! method, watingUserList[], roomUserList[]
-				waitingUserList = sfu.getWaitingList();
 				
 				
 				sendData = "{";
@@ -448,6 +447,7 @@ public class ServerMessageProcessor {
 	}
 	
 	public String method2062(ServerFromUser sfu) {
+		waitingUserList = sfu.getWaitingList();
 		String sendData = "{";
 		sendData += getJSONData("method","2062");
 		sendData += "," + "\"waitingUserList\":[";
