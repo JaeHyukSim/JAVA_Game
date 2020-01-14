@@ -98,6 +98,10 @@ public class LoginFormVer1 implements UserForm{
 	private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
 	private Runnable userRunnable;
 	
+	private JButton changeInfo;
+	private JButton withdrawal;
+	private JButton logout;
+	
 	
 	//6. 생성자를 만듭니다!!! - private인 것을 주의합시다!!!
 	private LoginFormVer1(DisplayThread dt, Socket socket) {
@@ -154,6 +158,9 @@ public class LoginFormVer1 implements UserForm{
 		expLabel = new JLabel();
 		chLabel = new JLabel();
 		
+		changeInfo = new JButton("정보 변경");
+		withdrawal = new JButton("회원 탈퇴");
+		logout = new JButton("로그아웃");
 		
 		
 		//8.  다음과 같이 Thread를 만들어 줍니다
@@ -237,6 +244,10 @@ public class LoginFormVer1 implements UserForm{
 		expLabel.setBounds(135, 90, 50, 10);
 		chLabel.setBounds(217,34,70,100);
 		
+		changeInfo.setBounds(20, 120, 90, 25);
+		withdrawal.setBounds(115, 120, 90, 25);
+		logout.setBounds(210, 120, 90, 25);
+		
 		jpanel.add(gamePanel);
 		jpanel.add(loginPanel);
 		
@@ -260,6 +271,10 @@ public class LoginFormVer1 implements UserForm{
 		loginOkLabel.add(expl);
 		loginOkLabel.add(expLabel);
 		loginOkLabel.add(chLabel);
+		
+		loginOkLabel.add(changeInfo);
+		loginOkLabel.add(withdrawal);
+		loginOkLabel.add(logout);
 	}
 
 	@Override
@@ -282,9 +297,6 @@ public class LoginFormVer1 implements UserForm{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//displayThread.setBounds(300, 0, 1440,1024);
-				//displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
-				
 				
 				//JSON Data
 				String sendData = "{";
@@ -329,13 +341,16 @@ public class LoginFormVer1 implements UserForm{
 				if(textFieldId.getText().length() == 0) {
 					lb.setText("아이디를 입력하세요!!");
 					jd.setVisible(true);
+					textFieldId.requestFocus();
 				}else if(isError == true) {
 					lb.setText("아이디는 대소문자와 숫자의 조합만 가능합니다!!");
 					jd.setSize(300,100);
 					jd.setVisible(true);
+					textFieldId.requestFocus();
 				}else if(textFieldPwd.getPassword().length == 0) {
 					lb.setText("비밀번호를 입력하세요!!");
 					jd.setVisible(true);
+					textFieldPwd.requestFocus();
 				}else {
 					id = textFieldId.getText();
 					//1. json data를 만든다.
@@ -360,40 +375,25 @@ public class LoginFormVer1 implements UserForm{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				signUpForm = SignUpForm.getInstance(socket);
+				signUpForm.dialogClear();
 				signUpForm.setDialLogVisible();
 			}
 		});
 		
-		loginOkLabel.addMouseListener(new MouseListener() {
+		logout.addActionListener(new ActionListener() {
 			
 			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
+			public void actionPerformed(ActionEvent e) {
+				//서버로 보내봅시다. 
+				//1. 메소드를 정해봅시다. 2100 -> 2102
+				String sendData = "{";
+				sendData += userMessageProcessor.getJSONData("method", "1400"); // logout request 
+				sendData += "}";
 				
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				System.out.println("(" + e.getX() + "," + e.getY() + ")");
-			}
-			
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				//13. 데이터를 서버로 보냅니다!
+				unt.setInputData(sendData);
+				userThread = new Thread(userRunnable);
+				userThread.start();
 			}
 		});
 	}
@@ -416,6 +416,7 @@ public class LoginFormVer1 implements UserForm{
 					jd.setVisible(false);
 				}
 			});
+			textFieldId.requestFocus();
 			break;
 		case "1014": // pwd - error
 			makeJDialog("비밀번호가 틀렸습니다.");
@@ -426,6 +427,7 @@ public class LoginFormVer1 implements UserForm{
 					jd.setVisible(false);
 				}
 			});
+			textFieldPwd.requestFocus();
 			break;
 		case "1002": // login okn 
 			id = (String)jsonObj.get("id");
@@ -456,6 +458,19 @@ public class LoginFormVer1 implements UserForm{
 			break;
 		case "1024": //login - already login : fail
 			signUpForm.getDialog("이미 로그인 중입니다.", 250, 100);
+			break;
+		case "1302": // init login form
+			init();
+			break;
+		case "1312": // card show change to login
+			displayThread.setSize(displayThread.WIDTH, displayThread.HEIGHT);
+			displayThread.setLocation(780, 220);
+			displayThread.getCardLayout().show(displayThread.getContentPane(), "login");
+			break;
+		case "1402": //logout request is accepted
+			card.show(loginPanel, "inputPanel");
+			init();
+			gameStartBtn.setEnabled(false);
 			break;
 		//... 수많은 case들
 		}
@@ -494,5 +509,10 @@ public class LoginFormVer1 implements UserForm{
 	
 	public void labelTextChange(JLabel l, String d) {
 		l.setText(d);
+	}
+	public void init() {
+		textFieldId.setText("");
+		textFieldPwd.setText("");
+		textFieldId.requestFocus();
 	}
 }

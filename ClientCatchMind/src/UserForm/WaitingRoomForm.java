@@ -279,7 +279,16 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		}
 		if(e.getSource() == b3)
 		{
+			//서버로 보내봅시다. 
+			//1. 메소드를 정해봅시다. 2100 -> 2102
+			String sendData = "{";
+			sendData += userMessageProcessor.getJSONData("method", "2400"); 
+			sendData += "}";
 			
+			//13. 데이터를 서버로 보냅니다!
+			unt.setInputData(sendData);
+			userThread = new Thread(userRunnable);
+			userThread.start();
 		}
 	}
 
