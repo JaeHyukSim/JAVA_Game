@@ -10,8 +10,8 @@ public class Client {
 		try {
 			
 			Socket socket;
-			socket = new Socket("211.238.142.202",portNum);
-			//socket = new Socket("localhost", portNum);
+			//socket = new Socket("211.238.142.202",portNum);
+			socket = new Socket("localhost", portNum);
 			
 			Runnable userServerInputThread = UserServerInputThread.getInstance(socket);
 			Thread serverThread = new Thread(userServerInputThread);
