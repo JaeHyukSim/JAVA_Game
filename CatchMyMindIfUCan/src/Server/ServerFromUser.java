@@ -10,19 +10,22 @@ import java.util.ArrayList;
 public class ServerFromUser implements Runnable, Observer{
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
-	private Station station;
+	private MegaStation station;
 	private ServerMessageProcessor serverMessageProcessor;
 	private String userMessage;
 	private Socket socket;
 	
 	private String id;
 	private String lv;
+	private String exp;
+	private String ch;
+	
 	private String state;
 	private String roomId;
 	private String readyState;
-	private String ch;
+
 	private String cnt;
-	private String exp;
+
 	
 	@Override
 	public String getId() {
@@ -34,7 +37,7 @@ public class ServerFromUser implements Runnable, Observer{
 		this.id = id;
 	}
 
-	public ServerFromUser(Station station, Socket socket) {
+	public ServerFromUser(MegaStation station, Socket socket) {
 		id = "#";
 		lv = "1";
 		state = "1";
@@ -72,13 +75,19 @@ public class ServerFromUser implements Runnable, Observer{
 				userMessage = inFromClient.readLine();
 				System.out.println("userMessage : " + userMessage);
 				userMessage = serverMessageProcessor.processingServerMessage(userMessage, this);
-				//station.broadcastObserver(userMessage);
-				//station.unicastObserver(userMessage, this);
 			}
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
 			station.removeObserver(this);
-			station.removeWaitingUser(this);
+			station.removeWaitObserver(this);
+			
+			System.out.println("delete operation : room id : " + roomId);
+			if(roomId.equals("0") == false) {
+				System.out.println("delete operation ok! remove room target!");
+				station.removeRoomObserverTarget(roomId, this);
+				String tmp = "{\"method\":\"2070\"}";
+				tmp = serverMessageProcessor.processingServerMessage(tmp, this);
+			}
 			//방에 있었다면, 제거한다
 			//removeUserFromRoom();
 			
@@ -99,7 +108,7 @@ public class ServerFromUser implements Runnable, Observer{
 	}
 	@Override
 	public ArrayList<RoomData> getRoomList(){
-		return station.getRoomList();
+		return station.getRoomUserList();
 	}
 	@Override
 	public ArrayList<Observer> getUserList() {
@@ -111,11 +120,11 @@ public class ServerFromUser implements Runnable, Observer{
 	}
 	@Override
 	public void setWaitingList() {
-		station.registerWaitingUser(this);
+		station.registerWaitObserver(this);
 	}
 	@Override
 	public ArrayList<Observer> getWaitingList(){
-		return station.getWaitingList();
+		return station.getWaitUserList();
 	}
 
 	public String getLv() {
@@ -133,7 +142,7 @@ public class ServerFromUser implements Runnable, Observer{
 	public void setState(String state) {
 		this.state = state;
 	}
-	public Station getStation() {
+	public MegaObserverble getStation() {
 		return station;
 	}
 
@@ -143,26 +152,6 @@ public class ServerFromUser implements Runnable, Observer{
 
 	public void setRoomId(String roomId) {
 		this.roomId = roomId;
-	}
-	
-	public void removeUserFromRoom() {
-		//방에 있었다면, 제거한다
-		if(!roomId.equals("0")) {
-			RoomData rd = station.findUserListById(roomId);
-			if(readyState.equals("1")) {
-				rd.setCountOfReadyUser(Integer.parseInt(rd.getCountOfReadyUser())-1 + "");
-			}
-			if(rd.getIdOfMasterUser().equals(id)) {
-				rd.setIdOfMasterUser(rd.getUserList().get(0).getId());	
-			}
-			rd.removeUserList(this);
-			if(rd.getUserList().size() == 0) {
-				station.removeRoomUserList(rd);
-			}
-			System.out.println("removed user(" + id + ") FROM room (" + roomId + ")");
-			roomId = "0";
-			readyState = "0";
-		}
 	}
 
 	public String getCh() {
