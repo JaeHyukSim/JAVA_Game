@@ -67,7 +67,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			
 				// table1에 타이틀 맨 위줄
 				// table1에 내용으로 들어갈 내용
-				String[] col1 = {"방번호", "방제목", "방장", "인원", "비고", "상태"};
+				String[] col1 = {"방번호", "방제목", "비밀번호여부", "비밀번호", "최대인원", "현재인원","비고"};
 				String[][] row1 = new String[0][col1.length];
 				
 				// table1에 DefaultTableModel(기본모양)으로 틀을 만들어 둠
@@ -168,17 +168,13 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			JSONObject jsonObj = ((JSONObject)jsonParser.parse(data));
 			
 			switch((String)(jsonObj.get("method"))) {
-			case "2002":
+			case "2002": // card show method (waiting room to game room)
 				displayThread.setBounds(300, 0, 1446,900);
 				displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
 				// init 함수 구현해서 1. 텍스트에어리어 초기화 2. 텍스트필드초기화
 
 				break;
-			case "2102":
-				//{
-				//	"method" : "2102",
-				//	"chat" : "abc -> asflakgnldngasl"
-				//}
+			case "2102": // chat method
 				ta.setText(ta.getText() + "\n" + (String)jsonObj.get("chat"));
 				break;
 				//대기방에서 클라이언트 전체화면이 전환되는 상황
@@ -188,7 +184,35 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				//room is full - so you can't make new room
 				//추천 : 
 				break;
-			
+			case "2052": // set false the dialog form
+				makeroom_dialog.setVisible(false);
+				break;
+			case "2062":
+				//data : wait -> id, lv, state - 여러개
+				//     : room -> roomId, roomName, roomPassState, roomPass, roomMaxUser, roomCurUser, roomState - 여러개
+				JSONArray roomList = (JSONArray)jsonObj.get("roomUserList");
+				String passState = "";
+				model1.setNumRows(0); model2.setNumRows(0);
+				for(int i = 0; i < roomList.size(); i++) {
+					JSONObject obj = (JSONObject)roomList.get(i);
+					passState = "";
+					if(((String)obj.get("roomPassState")).equals("0")) {
+						passState = "비번 없음";
+					}else {
+						passState = "비번있음";
+					}
+					String[] tmpData = {(String)obj.get("roomId"),(String)obj.get("roomName"),passState,
+							(String)obj.get("roomPass"),(String)obj.get("roomMaxUser"),(String)obj.get("roomCurUser"),
+							(String)obj.get("roomState")
+					};
+					model1.addRow(tmpData);
+				}
+				JSONArray userList = (JSONArray)jsonObj.get("waitingUserList");
+				for(int i = 0; i < userList.size(); i++) {
+					JSONObject obj = (JSONObject)userList.get(i);
+					String[] tmpData = {(String)obj.get("id"), (String)obj.get("lv"),(String)obj.get("state")};
+					model2.addRow(tmpData);
+				}
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();

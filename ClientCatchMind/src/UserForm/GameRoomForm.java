@@ -309,16 +309,6 @@ public void operation(java.lang.String data) {
 		case "3002":
 			displayThread.setBounds(300, 0, 1446,900);
 			displayThread.getCardLayout().show(displayThread.getContentPane(), "gameRoom");
-			String sendData = "{";
-			sendData += userMessageProcessor.getJSONData("method", "3400");
-			sendData += "}";
-			
-			//2. 서버로 보낸다.
-			//13. 데이터를 서버로 보냅니다!
-			unt.setInputData(sendData);
-			Runnable userRunnable = unt;
-			Thread userThread = new Thread(userRunnable);
-			userThread.start();
 			break;
 		case "3402":
 			System.out.println("get method 3402");
