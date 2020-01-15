@@ -79,7 +79,15 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				
 				// table1에 DefaultTableModel(기본모양)으로 틀을 만들어 둠
 				// table1에 만들어두었던 모델일 넣어줌
-				model1 = new DefaultTableModel(row1, col1);
+				model1 = new DefaultTableModel(row1, col1) {
+
+					@Override
+					public boolean isCellEditable(int row, int column) {
+						// TODO Auto-generated method stub
+						return false;
+					}
+					
+				};
 				table1 = new JTable(model1);
 				// 스크롤이 있는 팬을 생성하면서 table1을 추가 시킴
 				js1 = new JScrollPane(table1);
@@ -88,7 +96,15 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				String[] col2 = {"ID","레벨","게임상태"};
 				String[][] row2 = new String[0][col2.length];
 				
-				model2 = new DefaultTableModel(row2, col2);
+				model2 = new DefaultTableModel(row2, col2) {
+
+					@Override
+					public boolean isCellEditable(int row, int column) {
+						// TODO Auto-generated method stub
+						return false;
+					}
+					
+				};
 				table2 = new JTable(model2);
 				js2 = new JScrollPane(table2);
 				
@@ -144,6 +160,8 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		        table2.setColumnSelectionAllowed(false);
 		        table2.setRowSelectionAllowed(true);
 		        
+		        table1.addMouseListener(this);
+		        table2.addMouseListener(this);
 ////////////////////////////////////////////////////////////
 	}
 	
@@ -332,17 +350,28 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		// TODO Auto-generated method stub
 		if(e.getSource() == table1)
 		{
-			System.out.println("111111111111");
 			roomFocus = table1.getSelectedRow();
 			System.out.println("roomFocus : " + roomFocus);
 			if(e.getClickCount() == 2)
 			{
+				int data = table1.getSelectedRow();// index
+				System.out.println("data : " + data);
 				
+				//서버로 보내봅시다. 
+				//1. 메소드를 정해봅시다. 2100 -> 2102
+				String sendData = "{";
+				sendData += userMessageProcessor.getJSONData("method", "3010");
+				sendData += "," + userMessageProcessor.getJSONData("room", String.valueOf(data));
+				sendData += "}";
+				
+				//13. 데이터를 서버로 보냅니다!
+				unt.setInputData(sendData);
+				userThread = new Thread(userRunnable);
+				userThread.start();
 			}
 		}
 		else if(e.getSource() == table2)
 		{
-			System.out.println("2222222222222222");
 			waitFocus = table2.getSelectedRow();
 			System.out.println("waitFocus : " + waitFocus);
 			if(e.getClickCount() == 2)

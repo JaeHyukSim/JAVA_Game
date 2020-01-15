@@ -53,7 +53,8 @@ public class GameRoomForm extends JPanel implements UserForm{
    int userNum = 0;
    
    JPanel grSketch = new JPanel();
-   GrSketch sketchPanel = new GrSketch();
+   //GrSketch sketchPanel = new GrSketch();
+   GrSketch sketchPanel = GrSketch.getInstance(displayThread, socket);
    JPanel[] userPanel = new JPanel[6];
    JPanel exp = new JPanel();
    JPanel timer = new JPanel();
@@ -361,6 +362,15 @@ public void operation(java.lang.String data) {
 			break;
 		case "3014": // rejected to enter the room
 			System.out.println("room enter is rejected");
+			break;
+		case "3702": //get draw coordiate data
+			int x = Integer.parseInt(String.valueOf(jsonObj.get("x")));
+			int y = Integer.parseInt(String.valueOf(jsonObj.get("y")));
+			sketchPanel.setColor(String.valueOf(jsonObj.get("color")));
+			sketchPanel.draw(x, y);
+			break;
+		case "3712": // clear all
+			sketchPanel.setColor(String.valueOf(jsonObj.get("color")));
 			break;
 		}
 	}catch(Exception e) {

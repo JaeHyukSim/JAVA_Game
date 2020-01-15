@@ -1,10 +1,6 @@
 package UserForm;
 import java.awt.BasicStroke;
 
-
-
-
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -17,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.net.Socket;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -27,43 +24,36 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import org.json.simple.parser.JSONParser;
 
-
-
-
-
-public class GrSketch extends JPanel {
-
-
+import Client.DisplayThread;
+import Client.UserInputThread;
+import Client.UserMessageProcessor;
+public class GrSketch extends JPanel implements UserForm{
+	
+	private volatile static GrSketch uniqueInstance;
+	//4. 필수 변수들을 선언해 줍니다!!!!!
+	private UserMessageProcessor userMessageProcessor;
+	private DisplayThread displayThread;
+	private Socket socket;
+	private UserInputThread unt;
+	private JSONParser jsonParser;
+	
+	private Runnable userRunnable;
+	private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
 	
 	JPanel gui_panel, paint_panel;
 	
 	MyCanvas can;
-
-	
 	JButton pencil_bt, eraser_bt, colorRed, colorBlue, colorGreen, colorYellow, colorPink, colorViolet, colorOrange, colorBrown;
 	
 	JButton allClear;
-			
-	
-	
-
-
 	JButton colorSelect_bt;
 
 
 	JLabel thicknessInfo_label;
-	
-
-
-
 	JTextField thicknessControl_tf;
-
-	
 	JSlider thicknessControl_slider;
-	
-	
-	
 	Color selectedColor;
 
 	// Graphics2D Ŭ������ ����� ���� ����
@@ -71,10 +61,6 @@ public class GrSketch extends JPanel {
 
 	//Graphics2D�� ���� Graphics�� ��������
 	Graphics2D g;
-
-	
-	
-	//�׷����� ���� ���⸦ �����Ҷ� ���氪�� ����Ǵ� ����
 	int thickness = 10;
 
 	int startX;  // Ŭ�����۽ÿ� X��ǥ���� ����� ����
@@ -85,31 +71,19 @@ public class GrSketch extends JPanel {
 
     boolean tf = false;
     
+    private String color;
     
-    
-
-    	public GrSketch(){
-    	//Paint Ŭ������ ����Ʈ(Default)�����ڷ� �⺻���� GUI ����, �����ϴ� �κ�.
-
- 
-    	//���� �������� ���̾ƿ��� �ʱ�ȭ��Ŵ - �츮�� ���� ���������ϰ���
+    private GrSketch(DisplayThread dt, Socket socket){
+    	color = "black";
+    	this.displayThread = dt;
+		this.socket = socket;
+		userMessageProcessor = new UserMessageProcessor();
+		unt = UserInputThread.getInstance(socket);
+		jsonParser = new JSONParser();
+		
+		userRunnable = unt;
+		
     	setLayout(null);
-
-
-    	//�������� Ÿ��Ʋ
-  //  	setTitle(null);
-
-    	//������ ������
-  //  	setSize(880, 600);
-
-    	 //������
-  //  	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-    	
-
-    	
-
-    	//�׸��� �������� �ö󰡴� ����
     	gui_panel = new JPanel();
 
     	//���ȭ���� ���
@@ -118,9 +92,6 @@ public class GrSketch extends JPanel {
 
     	//��ġ������ ���� �õ��Ҽ� �ִ�.
     	gui_panel.setLayout(null);
-    	
-
-    	//���� ��ư ����  --> ���Ŀ� ���� �׸����� ��������
     	
     	pencil_bt = new JButton(new ImageIcon((getClass().getResource("..\\Resource\\color\\black1.jpg")))); 
     	
@@ -180,73 +151,28 @@ public class GrSketch extends JPanel {
     	colorBrown.setFocusPainted(false);
     	colorBrown.setContentAreaFilled(false);
 
-    	
-    	
-    	
-    
-    //  ���� ��ư�� �۾�ü�� ũ�� ����
-    //	pencil_bt.setFont(new Font("���ʷյ���",Font.BOLD, 15));
-	
-    	// ���� ��ư�� ���� 
-   // 	pencil_bt.setBackground(Color.WHITE);
-
-    	
     	eraser_bt = new JButton(new ImageIcon((getClass().getResource("..\\Resource\\color\\eraser.jpg")))); 
     	
     	eraser_bt.setBorderPainted(false);
     	eraser_bt.setFocusPainted(false);
     	eraser_bt.setContentAreaFilled(false);
 
-    //	eraser_bt.setFont(new Font("���ʷյ���",Font.BOLD, 20));
-
-    	//���찳 ��ư�� ���� �������
-
-   // 	eraser_bt.setBackground(Color.WHITE);
-
-    	
-    	
-    	
-    	
     	allClear = new JButton("ALL");
     	allClear.setFont(new Font("���ʷյ���",Font.BOLD, 17));
     
-    	
-    	
     	colorSelect_bt = new JButton("Color");
 
     	colorSelect_bt.setFont(new Font("���ʷյ���",Font.BOLD, 17));
 
-  //  	colorSelect_bt.setBackground(Color.WHITE);
-
-
-    //	colorSelect_bt.setBorderPainted(false);
-    //	colorSelect_bt.setFocusPainted(false);
-    //	colorSelect_bt.setContentAreaFilled(false);
-	
-
     	thicknessInfo_label = new JLabel("");
 
     	thicknessInfo_label.setFont(new Font("���ʷյ���",Font.BOLD, 15));
-
-    	
-    	
-    	//���� ���� �Է� �ؽ�Ʈ â�ʵ� ����
 
     	thicknessControl_tf = new JTextField("15", 10);
 
     	thicknessControl_tf.setHorizontalAlignment(JTextField.CENTER);
 
     	thicknessControl_tf.setFont(new Font("���ʷյ���",Font.BOLD, 20));
-   // 	thicknessControl_tf.setBorderPainted(false);
-   //	thicknessControl_tf.setFocusPainted(false);
-	    
-   //	thicknessControl_tf.setContentAreaFilled(false);
-  	
-
-    	
-   // 	colorRed, colorBlue, colorGreen, colorYellow, colorPink, colorViolet, colorOrange, colorBrown;
-		
-    	//���ʹ�ư ��ġ����
 
     	pencil_bt.setBounds(30, 0, 80, 50);
     	colorRed.setBounds(110, 0, 80, 50);
@@ -280,12 +206,7 @@ public class GrSketch extends JPanel {
     	//���� ���� ����Ʈ �ʵ� ��ġ ����
     	thicknessControl_tf.setBounds(670, 0, 70, 55);
 
-    	// (500, 0, 880, 100)
 
-    	
-
-    
-    	//gui_panel�� �����ʹ�ư �߰�
     	gui_panel.add(pencil_bt); 
     	gui_panel.add(colorRed);
     	gui_panel.add(colorBlue);
@@ -310,17 +231,6 @@ public class GrSketch extends JPanel {
 
     	gui_panel.setBounds(0, 450, 880, 150);  // gui_panel�� ������ ���� ��ġ�� ��ġ ����
 
-    	
-
-    	
-
-    	
-
-    	//  �г� ���� /////////////////////////////////////////////////////////////////
-
-    	
-
-    	// �׸��� �׷��� ��ȭ�� �г� ����
 
     	paint_panel = new JPanel();
 
@@ -331,39 +241,10 @@ public class GrSketch extends JPanel {
 
     	paint_panel.setBounds(0, 0, 880, 460);  //paint_panel �� ��ġ����
 
-
-
-    	
-
-    	
-
-    	//���� �����ӿ� �ΰ��� �г� �߰� - ��ġ�� ������ �� ��������
-
     	add(gui_panel);
 
     	add(paint_panel);
 
-    	
-
-    	//���� �������� ���̰� �Ѵ�.
-
-    	setVisible(true);
-
-    	   //	paint_panel.getGraphics();
-
-//	  	graphics = getGraphics(); //�׷��� �ʱ�ȭ
-
-    	
-    	//������ graphics ������ 2D �� ��ȯ�� 2D�� �ʱ�ȭ��(2D�� ����ϴ� ������ ���� ����� ���õ� ����� �����ϱ� ����. 2DŬ������ ��üȭ��)
-	  	
-	  
-//    	g = (Graphics2D)graphics;
-
-
-    	// �׷��� ���� ������  selectedColor�� ������ ����
-
-//    	g.setColor(selectedColor);
-    	
     	can = new MyCanvas();
     	
     	can.setSize(880,460); // ��ȭ�� ũ��
@@ -372,64 +253,8 @@ public class GrSketch extends JPanel {
     	
 
     	MyHandler my = new MyHandler();
-    	
     	can.addMouseMotionListener(my);
-    	
-		// �׼�ó�� �κ�//////////////////////////////////////////////////////////////////////
-
-    	
-    
-  /*
-    	can.addMouseListener(new MouseListener(){
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				//Ŭ�� �̺�Ʈ ó��
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			//	startX = e.getX(); //���콺 �������� X��ǥ������ �ʱ�ȭ
-			//	startY = e.getY(); //���콺 �������� Y��ǥ������ �ʱ�ȭ
-			}
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-					}
-    		   		
-    	});
-    	
-*/
-   	 
-
-    	//paint_panel�� ���콺 ��Ǹ����� �߰�
-
- //   	can.addMouseMotionListener(new PaintDraw());
-
-    	//�����ʹ�ưó��
-/*		
-    	pencil_bt.addActionListener(new ActionListener());
-    	
-    	colorRed.addActionListener(new ToolActionListener());
-    	colorBlue.addActionListener(new ToolActionListener());
-    	colorGreen.addActionListener(new ToolActionListener());
-    	colorYellow.addActionListener(new ToolActionListener());
-    	allClear.addActionListener(new ToolActionListener());
-    	
-    	colorPink.addActionListener(new ToolActionListener());
-    	colorViolet.addActionListener(new ToolActionListener());
-    	colorOrange.addActionListener(new ToolActionListener());
-    	colorBrown.addActionListener(new ToolActionListener());
-  */  	
+    	can.addMouseListener(my);
     	
     	pencil_bt.addActionListener(my);
     	
@@ -449,58 +274,88 @@ public class GrSketch extends JPanel {
 
    // 	eraser_bt.addActionListener(new ToolActionListener());
     	eraser_bt.addActionListener(my);
-    	
-    	/*
-  	colorSelect_bt.addActionListener(new ActionListener(){
-    		//�����ư �׼�ó���� �͸�Ŭ������ �ۼ�
-    
-    		public void actionPerformed(ActionEvent e){
-    			
-    			tf = true;
-    			JColorChooser chooser = new JColorChooser();  // JColorChooserŬ���� ��üȭ
-    			
-    			selectedColor = chooser.showDialog(null, "Color", Color.ORANGE);
-    			//selectedColor�� ���õ� ������ �ʱ�ȭ
-    			
-    			g.setColor(selectedColor);
-    			
-    			// �׷����� ���� ������ selectedColor�� �Ű������� �Ͽ� ����
-  			
-    		
-    		}
-    		
-    		
-    	});
-    	
-    	
-    	*/
-
+ 
     }
-    // ������ ��!!!
-    	
-    	
-    	
-    	
 	
-	class MyHandler implements MouseMotionListener, ActionListener{
+  //9. Singleton pattern의 유일한 instance를 만들기 위해 getInstance()메소드를 만듭니다.
+  	public static GrSketch getInstance(DisplayThread dt, Socket socket) {
+  		if(uniqueInstance == null) {
+  			synchronized (GrSketch.class) {
+  				if(uniqueInstance == null) {
+  					uniqueInstance = new GrSketch(dt, socket);
+  				}
+  			}
+  		}
+  		return uniqueInstance;
+  	}
+    public void setColor(String color) {
+    	System.out.println("color : " + color);
+    	switch(color) {
+    	case "black":
+    		can.cr = Color.black;	break;
+    	case "red":
+    		can.cr = Color.red;	break;
+    	case "blue":
+    		can.cr = Color.blue;	break;
+    	case "green":
+    		can.cr = Color.green;	break;
+    	case "yellow":
+    		can.cr = Color.yellow;	break;
+    	case "pink":
+    		can.cr = Color.pink;	break;
+    	case "magenta":
+    		can.cr = Color.magenta;	break;
+    	case "orange":
+    		can.cr = Color.orange;	break;
+    	case "white":
+    		can.cr = Color.white;	break;
+    	case "whiteAll":
+    		can.cr = Color.white;
+    		Graphics g = can.getGraphics();
+			g.clearRect(0, 0, can.getWidth(), can.getHeight());
+			break;
+    	}
+    }
+    public void draw(int x, int y) {
+    	startX = x;
+		startY = y;
+		can.x=startX;
+		can.y=startY;
+	    
+		can.repaint();
+		thickness = Integer.parseInt(thicknessControl_tf.getText());
+		endX = x;
+		endY = y;
+		startX = endX;
+		startY = endY;
+    }
+	class MyHandler implements MouseMotionListener, ActionListener, MouseListener{
 
 		
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			// TODO Auto-generated method stub
-			// setTitle("");
 			
+			//서버로 보내봅시다. 
+			//1. 메소드를 정해봅시다. 3700 -> 3702
+			String sendData = "{";
+			sendData += userMessageProcessor.getJSONData("method", "3700");
+			sendData += "," + userMessageProcessor.getJSONData("x", String.valueOf(e.getX()));
+			sendData += "," + userMessageProcessor.getJSONData("y", String.valueOf(e.getY()));
+			sendData += "," + userMessageProcessor.getJSONData("color", String.valueOf(color));
+			sendData += "}";
+			
+			//13. 데이터를 서버로 보냅니다!
+			unt.setInputData(sendData);
+			userThread = new Thread(userRunnable);
+			userThread.start();
+			/*
 			startX = e.getX(); //���콺 �������� X��ǥ������ �ʱ�ȭ
 			startY = e.getY(); //���콺 �������� Y��ǥ������ �ʱ�ȭ
 			can.x=startX;
 			can.y=startY;
 		    
 			can.repaint();
-			
-			
-			
-
     		thickness = Integer.parseInt(thicknessControl_tf.getText());
 
     		//�ؽ�Ʈ �ʵ� �κп��� ���� ������ thickness������ ����
@@ -512,24 +367,11 @@ public class GrSketch extends JPanel {
     	
     		endY = e.getY();  //�巡�� �Ǵ� �������� y��ǥ ����
 
-    	
-    		//can.gg.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND,0));
-
-    		//can.gg.drawLine(startX+5, startY+25, endX+5 ,endY+25);
-
-    		//������ �׷����� �Ǵ� �κ�
-
-    		
 
     		startX = endX;   // ���ۺκ��� �������� �巹�׵� X��ǥ�� ������ ������ �̾� �׷��� �� �ִ�.
 
     		startY = endY;    // ���ۺκ��� �������� �巹�׵� Y��ǥ�� ������ ������ �̾� �׷��� �� �ִ�.
-
-			
-			
-			
-			
-			
+*/
 		}
 
 		@Override
@@ -548,13 +390,12 @@ public class GrSketch extends JPanel {
     		MyCanvas can2 = (MyCanvas)can;
     		//////////////////////////////////////////////////////////////////
     		
-    		
-    		
     		if(o == pencil_bt){
 
     			//		if(tf == false) g.setColor(Color.BLACK);
     			//		else g.setColor(selectedColor);
     			//	g.setColor(Color.BLACK);
+    			color = "black";
     				can2.cr=Color.BLACK;	
 
     				}else if(o == colorRed){
@@ -562,6 +403,7 @@ public class GrSketch extends JPanel {
     				//	if(tf == false) g.setColor(Color.RED);
     				//	else g.setColor(selectedColor);
     				//	g.setColor(Color.RED);
+    					color = "red";
     					can2.cr=Color.red;
 
     				}else if(o == colorBlue){
@@ -569,7 +411,7 @@ public class GrSketch extends JPanel {
     			//		if(tf == false) g.setColor(Color.BLUE);
     			//		else g.setColor(selectedColor);
     				//g.setColor(Color.BLUE);
-    					
+    					color = "blue";
     					can2.cr=Color.blue;
     					
 
@@ -579,7 +421,7 @@ public class GrSketch extends JPanel {
     				//	else g.setColor(selectedColor);
     				//	g.setColor(Color.GREEN);
     					
-    					
+    					color = "green";
     					can2.cr=Color.GREEN;
     					
 
@@ -588,7 +430,7 @@ public class GrSketch extends JPanel {
     				//	if(tf == false) g.setColor(Color.YELLOW);
     				//	else g.setColor(selectedColor);
     				//	g.setColor(Color.YELLOW);
-    					
+    					color = "yellow";
     					can2.cr=Color.yellow;
 
     				}else if(o == colorPink){
@@ -596,7 +438,7 @@ public class GrSketch extends JPanel {
     				//	if(tf == false) g.setColor(Color.PINK);
     				//	else g.setColor(selectedColor);
     				//	g.setColor(Color.PINK);
-
+    					color = "pink";
     					can2.cr=Color.PINK;
 
     				}else if(o == colorViolet){
@@ -604,7 +446,7 @@ public class GrSketch extends JPanel {
     				//	if(tf == false) g.setColor(Color.MAGENTA);
     				//	else g.setColor(selectedColor);
     				//	g.setColor(Color.MAGENTA);
-
+    					color = "magenta";
     					can2.cr=Color.MAGENTA;
     					
     					
@@ -615,7 +457,7 @@ public class GrSketch extends JPanel {
     				//	else g.setColor(selectedColor);
     					
     				//	g.setColor(new Color(255,130,51));
-
+    					color = "orange";
     					can2.cr=Color.ORANGE;
     					
 
@@ -624,98 +466,100 @@ public class GrSketch extends JPanel {
     				//	if(tf == false) g.setColor(Color.getHSBColor(153, 102, 51));
     				//	else g.setColor(selectedColor);
     				//	g.setColor(new Color(194,113,81));
-
+    					color = "black";
     					can2.cr=Color.black;
     					
     				}else if(o == allClear){
-
-    					can2.cr=Color.WHITE;
-    				//    g.setColor(Color.white);
-    				//	g.fillRect(0, 0, 880 , 482);
+    					color = "whiteAll";
+    					//서버로 보내봅시다. 
+    					//1. 메소드를 정해봅시다. 3700 -> 3702
+    					String sendData = "{";
+    					sendData += userMessageProcessor.getJSONData("method", "3710");
+    					sendData += "," + userMessageProcessor.getJSONData("color", String.valueOf(color));
+    					sendData += "}";
     					
-    					Graphics g = can2.getGraphics();
-    					g.clearRect(0, 0, can.getWidth(), can.getHeight());
-
+    					//13. 데이터를 서버로 보냅니다!
+    					unt.setInputData(sendData);
+    					userThread = new Thread(userRunnable);
+    					userThread.start();
+    					
+    					
     				}else if(o == eraser_bt){
-
+    					color = "white";
     					can2.cr=Color.WHITE;
     				
-    					
-    					
-    				//	g.setColor(Color.WHITE);
-
     				}else if(o == colorSelect_bt) {
     					
+    					color = "selectColor";
     					Color selCr = JColorChooser.showDialog(null, "Color", Color.ORANGE);
     					can2.cr = selCr;
     				}
 
+		}
 
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			System.out.println("here!!!!!!!!!!!!!!!!!!!!");
+			//서버로 보내봅시다. 
+			//1. 메소드를 정해봅시다. 3700 -> 3702
+			String sendData = "{";
+			sendData += userMessageProcessor.getJSONData("method", "3720");
+			sendData += "}";
+			
+			//13. 데이터를 서버로 보냅니다!
+			unt.setInputData(sendData);
+			userThread = new Thread(userRunnable);
+			userThread.start();
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 		
 	}
+
+	@Override
+	public void display() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void actionPerformMethod() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operation(String data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public JPanel getJPanel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
-    
-
-    
-
-/*
- * public class PaintDraw implements MouseMotionListener{
- * 
- * 
- * 
- * @Override
- * 
- * public void mouseDragged(MouseEvent e){
- * 
- * // paint_panel ���� ���콺 �巡�� �׼��� ó���� �� �޼ҵ� ����
- * 
- * 
- * 
- * thickness = Integer.parseInt(thicknessControl_tf.getText());
- * 
- * //�ؽ�Ʈ �ʵ� �κп��� ���� ������ thickness������ ����
- * 
- * 
- * 
- * endX = e.getX(); //�巡�� �Ǵ� �������� x��ǥ ����
- * 
- * 
- * 
- * endY = e.getY(); //�巡�� �Ǵ� �������� y��ǥ ����
- * 
- * 
- * g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND,0));
- * 
- * g.drawLine(startX+5, startY+25, endX+5 ,endY+25);
- * 
- * //������ �׷����� �Ǵ� �κ�
- * 
- * 
- * 
- * startX = endX; // ���ۺκ��� �������� �巹�׵� X��ǥ�� ������ ������ �̾� �׷��� �� �ִ�.
- * 
- * startY = endY; // ���ۺκ��� �������� �巹�׵� Y��ǥ�� ������ ������ �̾� �׷��� �� �ִ�.
- * 
- * 
- * 
- * 
- * }
- * 
- * 
- * 
- * @Override
- * 
- * public void mouseMoved(MouseEvent e){
- * 
- * 
- * }
- * 
- * 
- * }
- */
-
-
-	
 }	
