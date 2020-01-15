@@ -71,6 +71,7 @@ public class DisplayThread extends JFrame implements Runnable{
 		 
 		//exit
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setVisible(true);
 	}
 	

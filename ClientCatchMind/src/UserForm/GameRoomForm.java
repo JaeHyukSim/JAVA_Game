@@ -36,6 +36,9 @@ public class GameRoomForm extends JPanel implements UserForm{
 		private JSONParser jsonParser;
 		//5. 사용할 JFrame container의 components들과 Thread를 선언해 줍니다!!!!
 		
+		private Runnable userRunnable;
+		private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
+		
    //색상
    //프레임
    Color color = new Color(175,238,238);
@@ -84,6 +87,8 @@ public class GameRoomForm extends JPanel implements UserForm{
 		userMessageProcessor = new UserMessageProcessor();
 		unt = UserInputThread.getInstance(socket);
 		jsonParser = new JSONParser();
+		
+		userRunnable = unt;
 		
       setLayout(null);
       
@@ -140,6 +145,7 @@ public class GameRoomForm extends JPanel implements UserForm{
          label[18+i].setBackground(colorin);
          label[18+i].setText("");
          userPanel[i].add(label[18+i]);
+         
       }
       
       //3.라운드표시기
@@ -281,6 +287,7 @@ public class GameRoomForm extends JPanel implements UserForm{
          b[i+3].setForeground(colorout);
       }
       
+      actionPerformMethod();
    }
 
    private Object String(String[] answer2) {
@@ -297,6 +304,25 @@ public void display() {
 @Override
 public void actionPerformMethod() {
 	// TODO Auto-generated method stub
+	(b[3]).addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//get out from room. 3600 
+			//1. request -> 2. remove from room(find room and remove usr) 
+			//3. register to wait room 4. init user's wait room 5. update other usr
+			//서버로 보내봅시다. 
+			
+			String sendData = "{";
+			sendData += userMessageProcessor.getJSONData("method", "3600"); 
+			sendData += "}";
+			System.out.println("나가기 클릭! : " + sendData);
+			//13. 데이터를 서버로 보냅니다!
+			unt.setInputData(sendData);
+			userThread = new Thread(userRunnable);
+			userThread.start();
+		}
+	});
 	
 }
 
@@ -309,8 +335,11 @@ public void operation(java.lang.String data) {
 		case "3002":
 			displayThread.setBounds(300, 0, 1446,900);
 			displayThread.getCardLayout().show(displayThread.getContentPane(), "gameRoom");
+			//init
+			init();
 			break;
 		case "3402":
+			init();
 			System.out.println("get method 3402");
 			JSONArray usr = (JSONArray)jsonObj.get("userList");
 			for(int i = 0; i < usr.size(); i++) {
@@ -319,6 +348,9 @@ public void operation(java.lang.String data) {
 				label[i+12].setText(String.valueOf(((JSONObject)usr.get(i)).get("lv")));
 				label[i+18].setText("0");
 			}
+			break;
+		case "3014": // rejected to enter the room
+			System.out.println("room enter is rejected");
 			break;
 		}
 	}catch(Exception e) {
@@ -333,4 +365,9 @@ public JPanel getJPanel() {
 	return this;
 }
 
+public void init() {
+	for(int i = 0; i < 24; i++) {
+		label[i].setText("");
+	}
+}
 }

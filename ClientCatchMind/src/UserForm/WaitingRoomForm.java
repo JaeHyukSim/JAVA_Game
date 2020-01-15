@@ -53,7 +53,14 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 	
 	private MakeRoom_Dialog makeroom_dialog;
 	
+	private int roomFocus;
+	private int waitFocus;
+	
+	
 	private WaitingRoomForm(DisplayThread dt, Socket socket) {
+		
+		roomFocus = -1;	waitFocus = -1;
+		
 		this.displayThread = dt;
 		this.socket = socket;
 		userMessageProcessor = new UserMessageProcessor();
@@ -131,6 +138,12 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				this.add(js2);
 				this.add(js3);
 				
+				
+				table1.setColumnSelectionAllowed(false);
+		        table1.setRowSelectionAllowed(true);
+		        table2.setColumnSelectionAllowed(false);
+		        table2.setRowSelectionAllowed(true);
+		        
 ////////////////////////////////////////////////////////////
 	}
 	
@@ -156,9 +169,6 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 	/////////////////////////////////////////////// => actionPerformed 사용할 것
 	@Override
 	public void actionPerformMethod() {
-		// TODO Auto-generated method stub
-		
-		
 	}
 	///////////////////////////////////////////////
 	
@@ -171,6 +181,8 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			case "2002": // card show method (waiting room to game room)
 				displayThread.setBounds(300, 0, 1446,900);
 				displayThread.getCardLayout().show(displayThread.getContentPane(), "waitingRoom");
+				ta.setText("");
+				tf.setText("");
 				// init 함수 구현해서 1. 텍스트에어리어 초기화 2. 텍스트필드초기화
 
 				break;
@@ -187,7 +199,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			case "2052": // set false the dialog form
 				makeroom_dialog.setVisible(false);
 				break;
-			case "2062":
+			case "2062": // for just 'one' user 
 				//data : wait -> id, lv, state - 여러개
 				//     : room -> roomId, roomName, roomPassState, roomPass, roomMaxUser, roomCurUser, roomState - 여러개
 				JSONArray roomList = (JSONArray)jsonObj.get("roomUserList");
@@ -213,6 +225,16 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 					String[] tmpData = {(String)obj.get("id"), (String)obj.get("lv"),(String)obj.get("state")};
 					model2.addRow(tmpData);
 				}
+				if(!(roomFocus < 0 || roomFocus >= table1.getRowCount())){
+					table1.setRowSelectionInterval(roomFocus, roomFocus);
+				}
+				if(!(waitFocus < 0 || waitFocus >= table2.getRowCount())) {
+					table2.setRowSelectionInterval(waitFocus, waitFocus);
+				}
+				break;
+			case "2072":	// for other usr -> get one class
+				
+				
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -275,7 +297,20 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		}
 		if(e.getSource() == b2)
 		{
+			int data = table1.getSelectedRow();// index
+			System.out.println("data : " + data);
 			
+			//서버로 보내봅시다. 
+			//1. 메소드를 정해봅시다. 2100 -> 2102
+			String sendData = "{";
+			sendData += userMessageProcessor.getJSONData("method", "3010");
+			sendData += "," + userMessageProcessor.getJSONData("room", String.valueOf(data));
+			sendData += "}";
+			
+			//13. 데이터를 서버로 보냅니다!
+			unt.setInputData(sendData);
+			userThread = new Thread(userRunnable);
+			userThread.start();
 		}
 		if(e.getSource() == b3)
 		{
@@ -297,13 +332,19 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		// TODO Auto-generated method stub
 		if(e.getSource() == table1)
 		{
+			System.out.println("111111111111");
+			roomFocus = table1.getSelectedRow();
+			System.out.println("roomFocus : " + roomFocus);
 			if(e.getClickCount() == 2)
 			{
-	
+				
 			}
 		}
 		else if(e.getSource() == table2)
 		{
+			System.out.println("2222222222222222");
+			waitFocus = table2.getSelectedRow();
+			System.out.println("waitFocus : " + waitFocus);
 			if(e.getClickCount() == 2)
 			{
 				
