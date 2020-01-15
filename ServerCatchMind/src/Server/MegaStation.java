@@ -58,6 +58,7 @@ public class MegaStation implements MegaObserverble{
 	}
 
 	@Override
+	
 	public void broadcastObserver(String data) {
 		Observer o;
 		for(int i = 0; i < userList.size(); i++) {

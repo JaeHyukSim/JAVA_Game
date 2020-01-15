@@ -40,7 +40,14 @@ public class ServerMessageProcessor {
 	//Room total info
 	private final int ROOMSIZE;
 			
+	/*graphic algorithm*/
+	int[][] slidingWindow;
+	int slidingWindowPointer;
+	
 	private ServerMessageProcessor() {
+		
+		slidingWindow = new int[2][2];
+		
 		ROOMSIZE = 30;
 		
 		jsonParser = new JSONParser();
@@ -163,7 +170,6 @@ public class ServerMessageProcessor {
 		String res = "";
 		//1. data json parsing
 		try {
-			System.out.println("data : " + data);
 			String sendData = "{";
 			
 			JSONParser jsonParser = new JSONParser();
@@ -330,6 +336,7 @@ public class ServerMessageProcessor {
 			case "3000": // create room
 				System.out.println("get method : 3000");
 				
+				
 				//full room
 				if(sfu.getStation().getRoomUserList().size() >= ROOMSIZE) {
 					sendData += getJSONData("method", "2224");
@@ -378,6 +385,8 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				sfu.getStation().unicastObserver(sendData, sfu);
 				
+				initSlidingWindow();
+				
 				//3. wait room data init - for other user
 				sendData = getAllListData(sfu);
 				sfu.getStation().broadcastWaitObserver(sendData);
@@ -394,7 +403,7 @@ public class ServerMessageProcessor {
 				}
 				RoomData rd = sfu.getStation().getRoomUserList().get(index);
 				System.out.println("room id : " + rd.getNumberOfRoom());
-				if(Integer.parseInt(rd.getCountOfCurrentUser()) + 1 >=
+				if(Integer.parseInt(rd.getCountOfCurrentUser()) >=
 						Integer.parseInt(rd.getCountOfMaximumUser())) {
 					//room is full
 					sendData = "{";
@@ -484,6 +493,85 @@ public class ServerMessageProcessor {
 					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 					sfu.setRoomId("0");
 				}
+				return sendData;
+			case "3700": //get draw coordinate - x, y
+				//1. don't use graphic algorithm
+				/*
+				sendData = "{";
+				sendData += getJSONData("method", "3702");
+				sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
+				sendData += "," + getJSONData("y", (String)jsonObj.get("y"));
+				sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
+				sendData += "}";
+				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				*/
+				/////////////////////////////////
+				
+				//2. use graphic algorithm
+				if(slidingWindow[slidingWindowPointer][0] == 100000) {
+					//if it is init state --------
+					
+					slidingWindow[slidingWindowPointer][0] = Integer.parseInt(String.valueOf(jsonObj.get("x")));
+					slidingWindow[slidingWindowPointer][1] = Integer.parseInt(String.valueOf(jsonObj.get("y")));
+					
+					sendData = "{";
+					sendData += getJSONData("method", "3702");
+					sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
+					sendData += "," + getJSONData("y", (String)jsonObj.get("y"));
+					sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
+					sendData += "}";
+					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				}else {
+					slidingWindow[slidingWindowPointer][0] = Integer.parseInt(String.valueOf(jsonObj.get("x")));
+					slidingWindow[slidingWindowPointer][1] = Integer.parseInt(String.valueOf(jsonObj.get("y")));
+					
+					//first : slidingWindow - [not pointer]     second : slidingWindow - [pointer]
+					int other = (slidingWindowPointer + 1)%2;
+					int XSize = Math.abs(slidingWindow[slidingWindowPointer][0] - slidingWindow[other][0]) + 1;
+					if(XSize == 1) {
+						for(int i = 0; i < 2; i++) {
+							sendData = "{";
+							sendData += getJSONData("method", "3702");
+							sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
+							sendData += "," + getJSONData("y", (String)jsonObj.get("y"));
+							sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
+							sendData += "}";
+							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						}
+					}else {
+						double d = (slidingWindow[slidingWindowPointer][1] - slidingWindow[other][1]) / (double)XSize;
+						int XMark = 1;
+						if(slidingWindow[slidingWindowPointer][0] - slidingWindow[other][0] < 0) {
+							XMark = -1;
+						}
+						for(int i = 1; i < XSize; i++) {
+							int x = slidingWindow[other][0] + XMark * i;
+							int y = (int)(slidingWindow[other][1] + i * d);
+							sendData = "{";
+							sendData += getJSONData("method", "3702");
+							sendData += "," + getJSONData("x",String.valueOf(x));
+							sendData += "," + getJSONData("y",String.valueOf(y));
+							sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
+							sendData += "}";
+							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						}
+					}
+					
+				}
+				/////////////////////////////////
+				slidingWindowPointer = (slidingWindowPointer + 1) % 2;
+				return sendData;
+			case "3710": // clear all
+				initSlidingWindow();
+				sendData = "{";
+				sendData += getJSONData("method", "3712");
+				sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
+				sendData += "}";
+				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				return sendData; 
+			case "3720":	//init sliding windouw
+				System.out.println("3720!!!!!!!!!!!!!!!!!!!");
+				initSlidingWindow();
 				return sendData;
 			}
 			
@@ -644,5 +732,14 @@ public class ServerMessageProcessor {
 		}
 		sendData += "]}";
 		return sendData;
+	}
+	
+	public void initSlidingWindow() {
+		for(int i = 0; i < 2; i++) {
+			for(int j = 0; j < 2; j++) {
+				slidingWindow[i][j] = 100000;
+			}
+		}
+		slidingWindowPointer = 0;
 	}
 }
