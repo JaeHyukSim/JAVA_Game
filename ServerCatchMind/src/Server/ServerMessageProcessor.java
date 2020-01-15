@@ -265,6 +265,13 @@ public class ServerMessageProcessor {
 				System.out.println("method to : 1202, sendData ok");
 				sfu.getStation().unicastObserver(sendData, sfu);
 				return sendData;
+			case "1400": //logout request
+				sendData = "{";
+				sendData += getJSONData("method", "1402");
+				sendData += "}";
+				sfu.setId("#");
+				sfu.getStation().unicastObserver(sendData, sfu);
+				return sendData;
 			case "2000":
 				//들어오니까 1. 대기실 유저 목록에 이 유저를 추가한다.
 				
@@ -299,6 +306,23 @@ public class ServerMessageProcessor {
 			case "2070":
 				sendData = method2062(sfu);
 				sfu.getStation().broadcastObserver(sendData);
+				return sendData;
+			case "2400":	//out from waiting room
+				sfu.getStation().removeWaitObserver(sfu); // remove user from waiting room
+				sendData = method2062(sfu); // update all user
+				sfu.getStation().broadcastObserver(sendData);
+				
+				//next change the card show to login form and init login form
+				//first. 1302 -> init login form
+				sendData = "{";
+				sendData += getJSONData("method", "1302");
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, sfu);
+				//second. 1312 -> card show
+				sendData = "{";
+				sendData += getJSONData("method", "1312");
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, sfu);
 				return sendData;
 			case "3000": // create room
 				System.out.println("get method : 3000");

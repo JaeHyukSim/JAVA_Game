@@ -154,12 +154,16 @@ public class SignUpForm implements UserForm{
 				System.out.println("current ID : " + idTF.getText() + ", inputedID : " + inputedId + ", isChecked : " + isChecked);
 				if(idTF.getText().equals("")) {
 					getDialog("아이디를 입력하세요",250,100);
+					idTF.requestFocus();
 				}else if(inputedId.equals("") || !(inputedId.equals(idTF.getText()) && isChecked == true)) {
 					getDialog("아이디 중복체크를 하세요", 250, 100);
+					idTF.requestFocus();
 				}else if(String.valueOf(pwdTF.getPassword()).equals("") || String.valueOf(pwdOkTF.getPassword()).equals("")) {
 					getDialog("패스워드를 입력하세요!", 250, 100);
+					pwdTF.requestFocus();
 				}else if(!String.valueOf(pwdTF.getPassword()).equals(String.valueOf(pwdOkTF.getPassword()))){
 					getDialog("패스워드가 다릅니다", 250, 100);
+					pwdTF.requestFocus();
 				}else {
 					//1. json data를 만든다.
 					String sendData = "{";
@@ -221,8 +225,11 @@ public class SignUpForm implements UserForm{
 		if(value == true) {
 			inputedId = currentId;
 			getDialog("사용할 수 있는 아이디 입니다!", 250, 100);
+			idTF.requestFocus();
+			
 		} else {
 			getDialog("사용할 수 없는 아이디 입니다!", 250, 100);
+			idTF.requestFocus();
 		}
 	}
 	
