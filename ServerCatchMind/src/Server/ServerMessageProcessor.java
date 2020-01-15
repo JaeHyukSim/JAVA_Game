@@ -389,6 +389,9 @@ public class ServerMessageProcessor {
 				return sendData;
 			case "3010": // get room enter!
 				int index = Integer.parseInt((String)jsonObj.get("room"));
+				if(index == -1) {
+					return sendData;
+				}
 				RoomData rd = sfu.getStation().getRoomUserList().get(index);
 				System.out.println("room id : " + rd.getNumberOfRoom());
 				if(Integer.parseInt(rd.getCountOfCurrentUser()) + 1 >=
