@@ -35,6 +35,7 @@ public class DisplayThread extends JFrame implements Runnable{
 	private UserForm game;
 	//Singleton constructor(ctor)
 	private DisplayThread(Socket socket) {
+		
 		this.socket = socket;
 		//Cursor
 		handCursor = new Cursor(Cursor.HAND_CURSOR);

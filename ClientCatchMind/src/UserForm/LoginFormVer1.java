@@ -173,7 +173,7 @@ public class LoginFormVer1 implements UserForm{
 	//9. Singleton pattern의 유일한 instance를 만들기 위해 getInstance()메소드를 만듭니다.
 	public static LoginFormVer1 getInstance(DisplayThread dt, Socket socket) {
 		if(uniqueInstance == null) {
-			synchronized (기본형태_이형태를맞춰주세요.class) {
+			synchronized (LoginFormVer1.class) {
 				if(uniqueInstance == null) {
 					uniqueInstance = new LoginFormVer1(dt, socket);
 				}
