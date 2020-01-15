@@ -53,6 +53,7 @@ public class GameRoomForm extends JPanel implements UserForm{
    int userNum = 0;
    
    JPanel grSketch = new JPanel();
+   GrSketch sketchPanel = new GrSketch();
    JPanel[] userPanel = new JPanel[6];
    JPanel exp = new JPanel();
    JPanel timer = new JPanel();
@@ -99,9 +100,18 @@ public class GameRoomForm extends JPanel implements UserForm{
       }
       
       //1. 스케치북      
-      grSketch.setBounds(280, 15, 880, 600);
-      grSketch.setBackground(Color.white);
-      add(grSketch);
+       grSketch.setBounds(280, 15, 880, 600);
+
+		grSketch.setBackground(Color.BLACK);
+		
+		grSketch.setLayout(null);
+		
+		sketchPanel.setBounds(0, 0, 880, 600);
+		
+		grSketch.add(sketchPanel);
+
+		add(grSketch);
+
       
       //2. 유저패널   
       for(int i=0; i<6; i++) {
