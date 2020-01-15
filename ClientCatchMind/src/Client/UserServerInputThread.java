@@ -77,6 +77,7 @@ public class UserServerInputThread implements Runnable{
 		try {
 			while(true) {
 				inputData = inFromServer.readLine();
+				System.out.println("inFromServer : " + inputData);
 				try {
 					System.out.println("UserServerInputThread data : " + inputData);
 					JSONObject jsonObj = (JSONObject)jsonParser.parse(inputData);
