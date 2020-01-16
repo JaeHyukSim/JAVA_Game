@@ -496,7 +496,7 @@ public class ServerMessageProcessor {
 				return sendData;
 			case "3700": //get draw coordinate - x, y
 				//1. don't use graphic algorithm
-				/*
+				
 				sendData = "{";
 				sendData += getJSONData("method", "3702");
 				sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
@@ -504,9 +504,9 @@ public class ServerMessageProcessor {
 				sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
 				sendData += "}";
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-				*/
-				/////////////////////////////////
 				
+				/////////////////////////////////
+				/*
 				//2. use graphic algorithm
 				if(slidingWindow[slidingWindowPointer][0] == 100000) {
 					//if it is init state --------
@@ -560,6 +560,7 @@ public class ServerMessageProcessor {
 				}
 				/////////////////////////////////
 				slidingWindowPointer = (slidingWindowPointer + 1) % 2;
+				*/
 				return sendData;
 			case "3710": // clear all
 				initSlidingWindow();
@@ -569,9 +570,11 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData; 
-			case "3720":	//init sliding windouw
-				System.out.println("3720!!!!!!!!!!!!!!!!!!!");
-				initSlidingWindow();
+			case "3720":	//init sliding window
+				sendData = "{";
+				sendData += getJSONData("method", "3722");
+				sendData += "}";
+				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;
 			}
 			
