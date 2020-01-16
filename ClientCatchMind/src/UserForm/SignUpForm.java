@@ -133,8 +133,7 @@ public class SignUpForm implements UserForm{
 					//2. 서버로 보낸다.
 					unt.setInputData(sendData);
 					Runnable userInputThread = unt;
-					Thread userThread = new Thread(userInputThread);
-					userThread.start();
+					unt.pushMessage();
 				}
 				
 			}
@@ -174,8 +173,7 @@ public class SignUpForm implements UserForm{
 					//2. 서버로 보낸다.
 					unt.setInputData(sendData);
 					Runnable userInputThread = unt;
-					Thread userThread = new Thread(userInputThread);
-					userThread.start();
+					unt.pushMessage();
 				}
 			}
 		});

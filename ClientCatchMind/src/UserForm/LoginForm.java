@@ -182,8 +182,7 @@ public class LoginForm implements UserForm{
 					//send to server
 					unt.setInputData(sendData); //unt내부에 있는 sendData라는 변수에 값을 대입한다.
 					Runnable rt = unt;
-					Thread ut = new Thread(rt);
-					ut.start();
+					unt.pushMessage();
 				}
 			});
 			gameStartBtn.setEnabled(false);
@@ -294,8 +293,7 @@ public class LoginForm implements UserForm{
 						//2. 서버로 보낸다.
 						unt.setInputData(sendData);
 						Runnable userInputThread = unt;
-						Thread userThread = new Thread(userInputThread);
-						userThread.start();
+						unt.pushMessage();
 					}
 				}
 			});

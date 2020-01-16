@@ -305,8 +305,7 @@ public class LoginFormVer1 implements UserForm{
 				//send to server
 				//13. 데이터를 서버로 보냅니다!
 				unt.setInputData(sendData);
-				userThread = new Thread(userRunnable);
-				userThread.start();
+				unt.pushMessage();
 			}
 		});
 		
@@ -363,8 +362,7 @@ public class LoginFormVer1 implements UserForm{
 					//2. 서버로 보낸다.
 					//13. 데이터를 서버로 보냅니다!
 					unt.setInputData(sendData);
-					userThread = new Thread(userRunnable);
-					userThread.start();
+					unt.pushMessage();
 				}
 			}
 		});
@@ -392,8 +390,7 @@ public class LoginFormVer1 implements UserForm{
 				
 				//13. 데이터를 서버로 보냅니다!
 				unt.setInputData(sendData);
-				userThread = new Thread(userRunnable);
-				userThread.start();
+				unt.pushMessage();
 			}
 		});
 	}

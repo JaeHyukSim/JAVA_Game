@@ -289,8 +289,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			
 			//13. 데이터를 서버로 보냅니다!
 			unt.setInputData(sendData);
-			userThread = new Thread(userRunnable);
-			userThread.start();
+			unt.pushMessage();
 			
 //			// 임시 String을 만든다
 //			String temp = null;
@@ -327,8 +326,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			
 			//13. 데이터를 서버로 보냅니다!
 			unt.setInputData(sendData);
-			userThread = new Thread(userRunnable);
-			userThread.start();
+			unt.pushMessage();
 		}
 		if(e.getSource() == b3)
 		{
@@ -340,8 +338,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			
 			//13. 데이터를 서버로 보냅니다!
 			unt.setInputData(sendData);
-			userThread = new Thread(userRunnable);
-			userThread.start();
+			unt.pushMessage();
 		}
 	}
 
@@ -366,8 +363,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				
 				//13. 데이터를 서버로 보냅니다!
 				unt.setInputData(sendData);
-				userThread = new Thread(userRunnable);
-				userThread.start();
+				unt.pushMessage();
 			}
 		}
 		else if(e.getSource() == table2)

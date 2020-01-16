@@ -39,6 +39,7 @@ public class GameRoomForm extends JPanel implements UserForm{
 		private Runnable userRunnable;
 		private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
 		
+		private Client.Queue que;
    //색상
    //프레임
    Color color = new Color(175,238,238);
@@ -82,8 +83,16 @@ public class GameRoomForm extends JPanel implements UserForm{
  		return uniqueInstance;
  	}
  	
-   private GameRoomForm(DisplayThread dt, Socket socket){
+ 	
+   public GrSketch getSketchPanel() {
+		return sketchPanel;
+	}
+public Client.Queue getQue() {
+		return que;
+	}
+private GameRoomForm(DisplayThread dt, Socket socket){
       
+	   
 	   this.displayThread = dt;
 		this.socket = socket;
 		userMessageProcessor = new UserMessageProcessor();
@@ -91,6 +100,11 @@ public class GameRoomForm extends JPanel implements UserForm{
 		jsonParser = new JSONParser();
 		
 		userRunnable = unt;
+		
+		que = new Client.Queue();
+		Runnable r = new QueueExecuteThread(this);
+		Thread t = new Thread(r);
+		t.start();
 		
       setLayout(null);
       
@@ -330,8 +344,7 @@ public void actionPerformMethod() {
 			System.out.println("나가기 클릭! : " + sendData);
 			//13. 데이터를 서버로 보냅니다!
 			unt.setInputData(sendData);
-			userThread = new Thread(userRunnable);
-			userThread.start();
+			unt.pushMessage();
 		}
 	});
 	
@@ -367,10 +380,15 @@ public void operation(java.lang.String data) {
 			int x = Integer.parseInt(String.valueOf(jsonObj.get("x")));
 			int y = Integer.parseInt(String.valueOf(jsonObj.get("y")));
 			sketchPanel.setColor(String.valueOf(jsonObj.get("color")));
-			sketchPanel.draw(x, y);
+			que.push(x, y);
+			System.out.println("que size : " + que.getSize());
 			break;
 		case "3712": // clear all
 			sketchPanel.setColor(String.valueOf(jsonObj.get("color")));
+			break;
+		case "3722": // init
+			que.push(10000,0);
+			//sketchPanel.initSlidingWindow();
 			break;
 		}
 	}catch(Exception e) {

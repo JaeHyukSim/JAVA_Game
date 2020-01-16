@@ -77,13 +77,10 @@ public class UserServerInputThread implements Runnable{
 		try {
 			while(true) {
 				inputData = inFromServer.readLine();
-				System.out.println("inFromServer : " + inputData);
 				try {
-					System.out.println("UserServerInputThread data : " + inputData);
 					JSONObject jsonObj = (JSONObject)jsonParser.parse(inputData);
 					
 					char op = ((String)jsonObj.get("method")).charAt(0);
-					System.out.println("op : " + op);
 					switch(op) {
 					case '1':
 						loginForm.operation(inputData);	break;

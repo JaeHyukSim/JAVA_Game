@@ -42,6 +42,10 @@ public class GrSketch extends JPanel implements UserForm{
 	private Runnable userRunnable;
 	private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
 	
+	/*graphic algorithm*/
+	int[][] slidingWindow;
+	int slidingWindowPointer;
+	
 	JPanel gui_panel, paint_panel;
 	
 	MyCanvas can;
@@ -82,6 +86,9 @@ public class GrSketch extends JPanel implements UserForm{
 		jsonParser = new JSONParser();
 		
 		userRunnable = unt;
+		
+		slidingWindow = new int[2][2];
+		initSlidingWindow();
 		
     	setLayout(null);
     	gui_panel = new JPanel();
@@ -316,7 +323,7 @@ public class GrSketch extends JPanel implements UserForm{
 			break;
     	}
     }
-    public void draw(int x, int y) {
+    public void printData(int x, int y) {
     	startX = x;
 		startY = y;
 		can.x=startX;
@@ -329,6 +336,71 @@ public class GrSketch extends JPanel implements UserForm{
 		startX = endX;
 		startY = endY;
     }
+    public void draw(int x, int y) {
+    	System.out.println("("+x+","+y+")");
+    	int other = (slidingWindowPointer + 1)%2;
+    	slidingWindow[slidingWindowPointer][0] = x;
+		slidingWindow[slidingWindowPointer][1] = y;
+		
+    	//2. use graphic algorithm
+		if(slidingWindow[other][0] == 100000) {
+			//if it is init state --------
+			//System.out.println("point 0");
+			//System.out.println("draw : ( " + x + "," + y + ")");
+			printData(x, y);
+		}else {
+			
+			//first : slidingWindow - [not pointer]     second : slidingWindow - [pointer]
+			int xSize = Math.abs(slidingWindow[slidingWindowPointer][0] - slidingWindow[other][0]);
+			int ySize = Math.abs(slidingWindow[slidingWindowPointer][1] - slidingWindow[other][1]);
+			//System.out.println("xSize : " + xSize);
+			//System.out.println("ySize : " + ySize);
+			int xMark = 1;
+			int yMark = 1;
+			if(slidingWindow[slidingWindowPointer][0] - slidingWindow[other][0] < 0) {
+				xMark = -1;
+			}
+			if(slidingWindow[slidingWindowPointer][1] - slidingWindow[other][1] < 0) {
+				yMark = -1;
+			}
+			if(xSize <= 1) {
+				//System.out.println("point : 1");
+				for(int i = 0; i <= ySize / 2; i++) {
+					//System.out.println("draw : (" + slidingWindow[other][0] + "," + (slidingWindow[other][1] + i * yMark) + ")");
+					
+					printData(slidingWindow[other][0], slidingWindow[other][1] + i * yMark);
+				}
+				for(int i = ySize / 2; i <= ySize; i++) {
+					//System.out.println("draw : (" + slidingWindow[slidingWindowPointer][0] + "," + (slidingWindow[other][1] + i * yMark) + ")");
+					
+					printData(slidingWindow[slidingWindowPointer][0],slidingWindow[other][1] + i * yMark);
+				}
+			}else {
+				//determine bagic x, y 
+				//System.out.println("point 2");
+				double d = (slidingWindow[slidingWindowPointer][1] - slidingWindow[other][1]) / (double)(xSize);
+				double ad = Math.abs(d);
+				int fx, fy;
+				for(int i = 0; i < xSize; i++) {
+					fx = slidingWindow[other][0] + i * xMark;
+					fy = (int)(slidingWindow[other][1] + i * d);
+					for(int j = 0; j <= (int)(ad/2); j++) {
+						System.out.println("draw : (" + fx + "," + (fy +  + j * yMark) + ")");
+						
+						printData(fx, fy + j * yMark);
+					}
+					for(int j = (int)(ad/2); j <= (int)ad; j++) {
+						System.out.println("draw : (" + fx + "," + (fy + j * yMark) + ")");
+						
+						printData(fx+1, fy + j * yMark);
+					}
+				}
+			}
+			/////////////////////////////////
+		}
+		slidingWindowPointer = (slidingWindowPointer + 1) % 2;
+    }
+    
 	class MyHandler implements MouseMotionListener, ActionListener, MouseListener{
 
 		
@@ -347,8 +419,7 @@ public class GrSketch extends JPanel implements UserForm{
 			
 			//13. 데이터를 서버로 보냅니다!
 			unt.setInputData(sendData);
-			userThread = new Thread(userRunnable);
-			userThread.start();
+			unt.pushMessage();
 			/*
 			startX = e.getX(); //���콺 �������� X��ǥ������ �ʱ�ȭ
 			startY = e.getY(); //���콺 �������� Y��ǥ������ �ʱ�ȭ
@@ -480,8 +551,7 @@ public class GrSketch extends JPanel implements UserForm{
     					
     					//13. 데이터를 서버로 보냅니다!
     					unt.setInputData(sendData);
-    					userThread = new Thread(userRunnable);
-    					userThread.start();
+    					unt.pushMessage();
     					
     					
     				}else if(o == eraser_bt){
@@ -519,8 +589,7 @@ public class GrSketch extends JPanel implements UserForm{
 			
 			//13. 데이터를 서버로 보냅니다!
 			unt.setInputData(sendData);
-			userThread = new Thread(userRunnable);
-			userThread.start();
+			unt.pushMessage();
 		}
 
 		@Override
@@ -561,5 +630,12 @@ public class GrSketch extends JPanel implements UserForm{
 		// TODO Auto-generated method stub
 		return null;
 	}
-    
+	public void initSlidingWindow() {
+		for(int i = 0; i < 2; i++) {
+			for(int j = 0; j < 2; j++) {
+				slidingWindow[i][j] = 100000;
+			}
+		}
+		slidingWindowPointer = 0;
+	}
 }	

@@ -62,6 +62,16 @@ public class UserInputThread implements Runnable{
 	
 	@Override
 	public void run() {
+		/*
+		try {
+			inputData += "\n";
+			outToServer.write(inputData.getBytes("UTF-8"));
+		}catch(IOException e) {
+			System.out.println("UserInputThread IOException error");
+		}
+		*/
+	}
+	public void pushMessage() {
 		try {
 			inputData += "\n";
 			outToServer.write(inputData.getBytes("UTF-8"));
