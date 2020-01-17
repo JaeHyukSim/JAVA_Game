@@ -28,7 +28,10 @@ public class RoomData {
 	}
 	
 	public boolean isAllReady() {
-		if(countOfCurrentUser.equals(countOfReadyUser)) {
+		if(countOfCurrentUser.equals("1")) {
+			return false;
+		}
+		if(countOfCurrentUser.equals(String.valueOf(Integer.parseInt(countOfReadyUser) - 1))) {
 			return true;
 		}else {
 			return false;

@@ -104,7 +104,7 @@ public Client.Queue getQue() {
 	}
 private GameRoomForm(DisplayThread dt, Socket socket){
       
-	   
+	
 	   this.displayThread = dt;
 		this.socket = socket;
 		userMessageProcessor = new UserMessageProcessor();
@@ -304,7 +304,8 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
 			if(e.getSource()==b[1])
-				inviteDialog.setVisible(true);
+				
+			inviteDialog.setVisible(true); // b[1]을 클릭했을때 inviteDialog를 띄운다.
 		}
 	});
       
@@ -348,6 +349,9 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       }
       
       actionPerformMethod();
+      
+      
+      inviteDialog = new InviteDialog(this); //// 생성한 이유는? 
    }
 
    private Object String(String[] answer2) {
@@ -449,4 +453,11 @@ public void init() {
 		label[i].setText("");
 	}
 }
+
+public UserMessageProcessor getUserMessageProcessor() {
+	return userMessageProcessor;
+}
+
+
+
 }

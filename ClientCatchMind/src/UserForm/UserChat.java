@@ -71,10 +71,10 @@ public class UserChat extends JTextField {
                   setBounds(1175-(5+getText().length()*20), 85, 5+getText().length()*20, 50);
                   break;
                case 4:
-                  setBounds(1175-(5+getText().length()*20), 85, 5+getText().length()*20, 50);
+                  setBounds(1175-(5+getText().length()*20), 290, 5+getText().length()*20, 50);
                   break;
                case 5:
-                  setBounds(1175-(5+getText().length()*20), 85, 5+getText().length()*20, 50);
+                  setBounds(1175-(5+getText().length()*20), 495, 5+getText().length()*20, 50);
                   break;
                }
                setVisible(true);

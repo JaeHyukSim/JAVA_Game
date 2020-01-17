@@ -48,7 +48,7 @@ public class MakeRoom_Dialog extends JDialog implements ActionListener{
 		b1.addActionListener(this);
 		b2.addActionListener(this);
 		
-		setLayout(null);
+		// setLayout(null);
 		
 		la1.setBounds(140,130,80,30);
 		tf.setBounds(235,130,150,30);
