@@ -16,8 +16,8 @@ public class RoomData {
 	
 	public RoomData() {
 		userList = new ArrayList<Observer>();
-		roomPass = "";
-		numberOfRoom = "0";
+		roomPass = "";	// 방 비밀번호
+		numberOfRoom = "0"; // 
 		nameOfRoom = "default room name!!";
 		countOfCurrentUser = "0";
 		countOfMaximumUser = "0";
@@ -27,7 +27,7 @@ public class RoomData {
 		roomPassState = "none";
 	}
 	
-	public boolean isAllIsReady() {
+	public boolean isAllReady() {
 		if(countOfCurrentUser.equals(countOfReadyUser)) {
 			return true;
 		}else {

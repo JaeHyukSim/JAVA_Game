@@ -167,6 +167,14 @@ public class ServerMessageProcessor {
 	
 	//very important factor : JSON Message Processing
 	public String processingServerMessage(String data, ServerFromUser sfu) {
+		
+		// 필요한것
+		// 1. 유저가 속한 방을 알고 싶을 때	-> sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		// 2. *** RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		// 3. 모든 사람이 레디했는지 알고 싶을 때 : rd.isAllReady() -> boolean을 return
+		
+		
+		
 		String res = "";
 		//1. data json parsing
 		try {
@@ -412,9 +420,26 @@ public class ServerMessageProcessor {
 					sfu.getStation().unicastObserver(sendData, sfu);
 					return sendData;
 				}
+				//if passward state is existed ... 
 				if(rd.getRoomPassState().equals("0") == false) {
-					//room pass logic
+					//비밀번호를 검사해야겠죠?
+					if(!(rd.getRoomPass().equals((String)jsonObj.get("pass")))) // 입력한 비밀번호가 맞다면,
+					{
+						sendData = "{";
+						sendData+= getJSONData("method", "2113");
+						sendData += "}";
+						sfu.getStation().unicastObserver(sendData, sfu);					
+						System.out.println("wrongPwd: "+sendData);
+						return sendData;
+					}
+					
 				}
+				// 1. set Visible off
+				sendData = "{";
+				sendData+= getJSONData("method", "2112");
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, sfu);
+				System.out.println("equalPwd"+sendData);
 				// 1. waiting room set
 				sfu.getStation().removeWaitObserver(sfu);
 				// 2. go into room
@@ -554,6 +579,7 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				
 				return sendData;
 			}
 			

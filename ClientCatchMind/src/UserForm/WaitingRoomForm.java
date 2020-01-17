@@ -9,6 +9,7 @@ import java.awt.event.MouseListener;
 import java.net.Socket;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -30,6 +31,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 
 	private volatile static WaitingRoomForm uniqueInstance;
 	
+	private PasswordDialog pwdDialog;
 	private UserMessageProcessor userMessageProcessor;
 	private DisplayThread displayThread;
 	private Socket socket;
@@ -70,6 +72,7 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		
 ////////////////////////////////////////////////////////////
 		
+		pwdDialog = new PasswordDialog(this);
 				makeroom_dialog = new MakeRoom_Dialog(this);
 			
 				// table1에 타이틀 맨 위줄
@@ -210,6 +213,17 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				//대기방에서 클라이언트 전체화면이 전환되는 상황
 			case "2012":
 				break;
+			case "2112": // 입력한 비밀번호가 맞기때문에, 방에 입장
+	            pwdDialog.pf.setText("");
+	            pwdDialog.pf.requestFocus();
+	            pwdDialog.setVisible(false);
+	            
+	            break;
+	         case "2113": // 입력한 비밀번호가 맞지않기때문에, 다시 입력을 요망
+	            JOptionPane.showMessageDialog(this, "다시 입력해주세요.");
+	            pwdDialog.pf.setText("");
+	            pwdDialog.pf.requestFocus();
+	            break;
 			case "2224":
 				//room is full - so you can't make new room
 				//추천 : 
@@ -349,11 +363,25 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 		{
 			roomFocus = table1.getSelectedRow();
 			System.out.println("roomFocus : " + roomFocus);
+			
 			if(e.getClickCount() == 2)
 			{
 				int data = table1.getSelectedRow();// index
 				System.out.println("data : " + data);
 				
+				String passstate=table1.getValueAt(roomFocus, 2).toString();
+				System.out.println("passstate: "+passstate);
+				String havePassword="비번있음";
+				
+				if(passstate.equals(havePassword))
+				{
+					pwdDialog.setRoomId(String.valueOf(roomFocus));
+					System.out.println("pwdDialog pushed!! : " + roomFocus);
+					pwdDialog.setVisible(true);
+					
+					return;
+				}
+				////////////////////
 				//서버로 보내봅시다. 
 				//1. 메소드를 정해봅시다. 2100 -> 2102
 				String sendData = "{";

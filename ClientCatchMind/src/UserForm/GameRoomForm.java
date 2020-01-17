@@ -40,6 +40,17 @@ public class GameRoomForm extends JPanel implements UserForm{
 		private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
 		
 		private Client.Queue que;
+		
+		////////////////////////////////////
+		////////////////////////////////////
+		private InviteDialog inviteDialog;
+		
+		
+		
+		
+		
+		
+		
    //색상
    //프레임
    Color color = new Color(175,238,238);
@@ -284,6 +295,24 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 			t.start();
 		}
 	});
+      
+      ////////////////////////////////////////////////
+      ////////////////////////////////////////////////
+      b[1].addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(e.getSource()==b[1])
+				inviteDialog.setVisible(true);
+		}
+	});
+      
+      
+      ////////////////////////////////////////////////
+      
+      
+      
       
       for (int i=0;i<1;i++)
       {  
