@@ -21,6 +21,7 @@ public interface MegaObserverble {
 	public void unicastObserver(String data,Observer o);
 	
 	public int findRoomObserver(String id);
+	public RoomData findRoomObserver_RoomData(String id);
 	
 	public ArrayList<Observer> getUserList();
 	public ArrayList<Observer> getWaitUserList();

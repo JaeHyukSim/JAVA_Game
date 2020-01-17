@@ -27,6 +27,28 @@ public class RoomData {
 		roomPassState = "none";
 	}
 	
+	public boolean isAllIsReady() {
+		if(countOfCurrentUser.equals(countOfReadyUser)) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	public void someoneReadyOff() {
+		if(countOfReadyUser.equals("0")) {
+			System.out.println("Nobody is ready!");
+		}else {
+			countOfReadyUser = String.valueOf(Integer.parseInt(countOfReadyUser) - 1);
+		}
+		
+	}
+	public void someoneReadyOn() {
+		if(countOfReadyUser.equals(countOfCurrentUser)) {
+			System.out.println("Everyone is ready!");
+		}else {
+			countOfReadyUser = String.valueOf(Integer.parseInt(countOfReadyUser) + 1);
+		}
+	}
 	public void addUserList(Observer o) {
 		userList.add(o);
 		countOfCurrentUser = String.valueOf(Integer.parseInt(countOfCurrentUser) + 1);

@@ -323,18 +323,27 @@ public class GrSketch extends JPanel implements UserForm{
 			break;
     	}
     }
+    
+    
+    
     public void printData(int x, int y) {
+    	
+    	System.out.println("print : (" + x +"," + y + ")");
+    	/*
     	startX = x;
 		startY = y;
 		can.x=startX;
 		can.y=startY;
-	    
-		can.repaint();
+	    */
+    	can.x = x;	can.y = y;
+		can.repaint(); // it is thread
+		/*
 		thickness = Integer.parseInt(thicknessControl_tf.getText());
 		endX = x;
 		endY = y;
 		startX = endX;
 		startY = endY;
+		*/
     }
     public void draw(int x, int y) {
     	System.out.println("("+x+","+y+")");
@@ -385,12 +394,12 @@ public class GrSketch extends JPanel implements UserForm{
 					fx = slidingWindow[other][0] + i * xMark;
 					fy = (int)(slidingWindow[other][1] + i * d);
 					for(int j = 0; j <= (int)(ad/2); j++) {
-						System.out.println("draw : (" + fx + "," + (fy +  + j * yMark) + ")");
+						//System.out.println("draw : (" + fx + "," + (fy +  + j * yMark) + ")");
 						
 						printData(fx, fy + j * yMark);
 					}
 					for(int j = (int)(ad/2); j <= (int)ad; j++) {
-						System.out.println("draw : (" + fx + "," + (fy + j * yMark) + ")");
+						//System.out.println("draw : (" + fx + "," + (fy + j * yMark) + ")");
 						
 						printData(fx+1, fy + j * yMark);
 					}

@@ -467,10 +467,18 @@ public class ServerMessageProcessor {
 				sendData += getJSONData("method", "3402 : data : " + sendData);
 				return sendData;
 			case "3600": // get out from room
+				boolean isExistRoom = true;
 				//1. request -> 2. remove from room(find room and remove usr) 
 				//3. register to wait room 4. init user's wait room 5. update other usr
+				
+				index = sfu.getStation().findRoomObserver(sfu.getRoomId());
+				rd = sfu.getStation().getRoomUserList().get(index);
+				if(sfu.getStation().getRoomUserList().get(index).getCountOfCurrentUser().equals("1")) {
+					isExistRoom = false;
+				}
 				sfu.getStation().registerWaitObserver(sfu); // register
 				sfu.getStation().removeRoomObserverTarget(sfu.getRoomId(), sfu);
+				
 				//first. card change and init chat
 				sendData = "{";
 				sendData += getJSONData("method", "2002");
@@ -484,17 +492,26 @@ public class ServerMessageProcessor {
 				sfu.getStation().broadcastWaitObserver(sendData);
 				
 				//broadcast data to all (room) 1. find room 2. broadcast
-				if(sfu.getRoomId().equals("0") == false) {
+				if(isExistRoom == true) {
 					sendData = getAllGameData(sfu);
+					
 					if(sendData == "NO") {
 						System.out.println("ServerMessageProcessor - getAllGameData : NO");
 						return sendData;
 					}
 					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-					sfu.setRoomId("0");
+					
+					if(rd.getIdOfMasterUser().equals(sfu.getId())) {
+						rd.setIdOfMasterUser(rd.getUserList().get(0).getId());
+						//sendData who is master?
+						sendData = messageForMaster(rd);
+						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					}
 				}
+				sfu.setRoomId("0");
+				sfu.setReadyState("0");
 				return sendData;
-			case "3700": //get draw coordinate - x, y
+			case "3700": //DRAW - get draw coordinate - x, y
 				//1. don't use graphic algorithm
 				
 				sendData = "{";
@@ -504,65 +521,8 @@ public class ServerMessageProcessor {
 				sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
 				sendData += "}";
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-				
-				/////////////////////////////////
-				/*
-				//2. use graphic algorithm
-				if(slidingWindow[slidingWindowPointer][0] == 100000) {
-					//if it is init state --------
-					
-					slidingWindow[slidingWindowPointer][0] = Integer.parseInt(String.valueOf(jsonObj.get("x")));
-					slidingWindow[slidingWindowPointer][1] = Integer.parseInt(String.valueOf(jsonObj.get("y")));
-					
-					sendData = "{";
-					sendData += getJSONData("method", "3702");
-					sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
-					sendData += "," + getJSONData("y", (String)jsonObj.get("y"));
-					sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
-					sendData += "}";
-					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-				}else {
-					slidingWindow[slidingWindowPointer][0] = Integer.parseInt(String.valueOf(jsonObj.get("x")));
-					slidingWindow[slidingWindowPointer][1] = Integer.parseInt(String.valueOf(jsonObj.get("y")));
-					
-					//first : slidingWindow - [not pointer]     second : slidingWindow - [pointer]
-					int other = (slidingWindowPointer + 1)%2;
-					int XSize = Math.abs(slidingWindow[slidingWindowPointer][0] - slidingWindow[other][0]) + 1;
-					if(XSize == 1) {
-						for(int i = 0; i < 2; i++) {
-							sendData = "{";
-							sendData += getJSONData("method", "3702");
-							sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
-							sendData += "," + getJSONData("y", (String)jsonObj.get("y"));
-							sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
-							sendData += "}";
-							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-						}
-					}else {
-						double d = (slidingWindow[slidingWindowPointer][1] - slidingWindow[other][1]) / (double)XSize;
-						int XMark = 1;
-						if(slidingWindow[slidingWindowPointer][0] - slidingWindow[other][0] < 0) {
-							XMark = -1;
-						}
-						for(int i = 1; i < XSize; i++) {
-							int x = slidingWindow[other][0] + XMark * i;
-							int y = (int)(slidingWindow[other][1] + i * d);
-							sendData = "{";
-							sendData += getJSONData("method", "3702");
-							sendData += "," + getJSONData("x",String.valueOf(x));
-							sendData += "," + getJSONData("y",String.valueOf(y));
-							sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
-							sendData += "}";
-							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-						}
-					}
-					
-				}
-				/////////////////////////////////
-				slidingWindowPointer = (slidingWindowPointer + 1) % 2;
-				*/
 				return sendData;
-			case "3710": // clear all
+			case "3710": // DRAW - clear all
 				initSlidingWindow();
 				sendData = "{";
 				sendData += getJSONData("method", "3712");
@@ -574,6 +534,25 @@ public class ServerMessageProcessor {
 				sendData = "{";
 				sendData += getJSONData("method", "3722");
 				sendData += "}";
+				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				return sendData;
+			case "3309":	// game room chat
+				rd = sfu.getStation().getRoomUserList().get(sfu.getStation().findRoomObserver(sfu.getRoomId()));
+				index = -1;
+				for(int i = 0; i < rd.getUserList().size(); i++) {
+					if(rd.getUserList().get(i).equals(sfu)) {
+						index = i;
+					}
+				}
+				if(index == -1) {
+					return sendData;
+				}
+				sendData = "{";
+				sendData += getJSONData("method", "3300");
+				sendData += "," + getJSONData("message", String.valueOf(jsonObj.get("message")));
+				sendData += "," + getJSONData("userNum", String.valueOf(index));
+				sendData += "}";
+				
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;
 			}
@@ -737,6 +716,15 @@ public class ServerMessageProcessor {
 		return sendData;
 	}
 	
+	//who is master?
+	public String messageForMaster(RoomData rd) {
+		String sendData = "{";
+		sendData += getJSONData("method", "3902");
+		sendData += "," + getJSONData("master", rd.getIdOfMasterUser());
+		sendData += "}";
+		return sendData;
+		
+	}
 	public void initSlidingWindow() {
 		for(int i = 0; i < 2; i++) {
 			for(int j = 0; j < 2; j++) {

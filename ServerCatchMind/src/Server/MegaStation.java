@@ -117,6 +117,10 @@ public class MegaStation implements MegaObserverble{
 		int index = findRoomObserver(id);
 		if(index != -1) {
 			roomUserList.get(index).removeUserList(o);
+			if(o.getReadyState().equals("1")) {
+				//roomUserList.get(index).setCountOfReadyUser(String.valueOf(Integer.parseInt(roomUserList.get(index).getCountOfReadyUser()) - 1));
+				roomUserList.get(index).someoneReadyOff();
+			}
 			if(roomUserList.get(index).getCountOfCurrentUser().equals("0")) {
 				removeRoomObserver(id);
 			}
@@ -134,5 +138,12 @@ public class MegaStation implements MegaObserverble{
 	public ArrayList<RoomData> getRoomUserList(){
 		return roomUserList;
 		
+	}
+
+	@Override
+	public RoomData findRoomObserver_RoomData(String id) {
+		int index = findRoomObserver(id);
+		RoomData rd = roomUserList.get(index);
+		return rd;
 	}
 }

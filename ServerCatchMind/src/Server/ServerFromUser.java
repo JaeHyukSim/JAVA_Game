@@ -25,7 +25,8 @@ public class ServerFromUser implements Runnable, Observer{
 	private String readyState;
 
 	private String cnt;
-
+	
+	private ArrayList<Observer> friends;
 	
 	@Override
 	public String getId() {
@@ -46,6 +47,7 @@ public class ServerFromUser implements Runnable, Observer{
 		exp = "123";
 		lv = "2";
 		ch = "2";
+		friends = new ArrayList<Observer>();
 		
 		this.station = station;
 		this.socket = socket;
@@ -95,8 +97,8 @@ public class ServerFromUser implements Runnable, Observer{
 		
 		try {
 			data += "\n";
-			//outToClient.write(data.getBytes("UTF-8"));
-			outToClient.write(data.getBytes("MS949"));
+			outToClient.write(data.getBytes("UTF-8"));
+			//outToClient.write(data.getBytes("MS949"));
 		} catch (IOException e) {
 			System.out.println("in ServerFromUser - outToClient write encoding error");
 			e.printStackTrace();
@@ -172,6 +174,14 @@ public class ServerFromUser implements Runnable, Observer{
 
 	public void setExp(String exp) {
 		this.exp = exp;
+	}
+
+	public ArrayList<Observer> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(ArrayList<Observer> friends) {
+		this.friends = friends;
 	}
 	
 	

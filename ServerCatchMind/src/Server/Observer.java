@@ -34,4 +34,8 @@ public interface Observer {
 
 	public void setExp(String exp);
 	
+	public String getReadyState();
+
+	public void setReadyState(String readyState);
+	
 }

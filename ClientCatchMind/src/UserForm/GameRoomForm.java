@@ -51,7 +51,8 @@ public class GameRoomForm extends JPanel implements UserForm{
    // 채팅 표시할 텍스트 필드 선언
    public UserChat[] userChat = new UserChat[6];
    // 채팅 표시 위한 패널별 유저 넘버. 임시로 0.
-   int userNum = 0;
+   int userNum;
+   int myUserNum;
    
    JPanel grSketch = new JPanel();
    //GrSketch sketchPanel = new GrSketch();
@@ -225,7 +226,12 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 				if(message.length()>10) {
 					message = message.substring(0, 10);
 				}
-				userChat[userNum].printChat(message);
+				String sendData="{";
+				sendData += userMessageProcessor.getJSONData("method", "3309");
+				sendData += "," + userMessageProcessor.getJSONData("message", message);
+				sendData += "}";
+				unt.setInputData(sendData);
+				unt.pushMessage();
 				tf.setText("");
 			}
 		}
@@ -370,7 +376,7 @@ public void operation(java.lang.String data) {
 				label[i].setText(String.valueOf(((JSONObject)usr.get(i)).get("ch")));
 				label[i+6].setText(String.valueOf(((JSONObject)usr.get(i)).get("id")));
 				label[i+12].setText(String.valueOf(((JSONObject)usr.get(i)).get("lv")));
-				label[i+18].setText("0");
+				label[i+18].setText("0"); // score
 			}
 			break;
 		case "3014": // rejected to enter the room
@@ -389,6 +395,12 @@ public void operation(java.lang.String data) {
 		case "3722": // init
 			que.push(10000,0);
 			//sketchPanel.initSlidingWindow();
+			break;
+		case "3300":
+			int userNum = Integer.parseInt(String.valueOf(jsonObj.get("userNum")));
+			System.out.println("3300 userNum : " + userNum);
+			String message = String.valueOf(jsonObj.get("message"));
+			userChat[userNum].printChat(message);
 			break;
 		}
 	}catch(Exception e) {
