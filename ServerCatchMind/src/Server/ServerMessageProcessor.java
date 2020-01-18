@@ -39,13 +39,16 @@ public class ServerMessageProcessor {
 	
 	//Room total info
 	private final int ROOMSIZE;
-			
+	
 	/*graphic algorithm*/
 	int[][] slidingWindow;
 	int slidingWindowPointer;
 	
+	private JSONObject json;
+	
 	private ServerMessageProcessor() {
 		
+		json = new JSONObject();
 		slidingWindow = new int[2][2];
 		
 		ROOMSIZE = 30;
@@ -266,8 +269,8 @@ public class ServerMessageProcessor {
 				body += "," + getJSONData("pwd",(String)jsonObj.get("pwd"));
 				body += "," + getJSONData("lv", "1");
 				body += "," + getJSONData("exp", "0");
-				body += "," + getJSONData("ch", "1");
-				body += "," + getJSONData("friendList", "");
+				body += "," + getJSONData("ch", String.valueOf(jsonObj.get("ch")));
+				body += "," + getJSONData("friendList", "[]");
 				body += "}";
 				dataStream = head + body + tail;
 				System.out.println("body : " + body);
@@ -285,6 +288,14 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				sfu.setId("#");
 				sfu.getStation().unicastObserver(sendData, sfu);
+				return sendData;
+			case "1500": // withdrawal
+				json.clear();
+				json.put("method", "1502");
+				sendData = String.valueOf(json);
+				sfu.getStation().broadcastObserver(sendData);
+				removeMember(sfu);
+				
 				return sendData;
 			case "2000":
 				//들어오니까 1. 대기실 유저 목록에 이 유저를 추가한다.
@@ -758,5 +769,20 @@ public class ServerMessageProcessor {
 			}
 		}
 		slidingWindowPointer = 0;
+	}
+	
+	//remove member method
+	public void removeMember(ServerFromUser sfu) {
+		//1. remove from file
+		JSONArray jsonArr = (JSONArray)(userData.get("USER_DATA"));
+		for(int i = 0; i < jsonArr.size(); i++) {
+			if(((JSONObject)jsonArr.get(i)).get("id").equals(sfu.getId())) {
+				jsonArr.remove(i);	break;
+			}
+		}
+		setFileData();
+		
+		//2. remove from userList
+		sfu.setId("#");
 	}
 }
