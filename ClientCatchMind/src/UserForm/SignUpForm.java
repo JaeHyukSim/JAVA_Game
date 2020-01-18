@@ -9,11 +9,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.Socket;
 
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import Client.UserInputThread;
@@ -45,6 +48,12 @@ public class SignUpForm implements UserForm{
 	private boolean isChecked;
 	private String currentId;
 	
+	private JRadioButton[] character;
+	private ButtonGroup chGroup;
+	
+	private JLabel[] chLabel;
+	private ImageIcon[] chIcon;
+	
 	private SignUpForm(Socket socket) {
 		this.socket = socket;
 		unt = UserInputThread.getInstance(socket);
@@ -70,11 +79,17 @@ public class SignUpForm implements UserForm{
 		check = new JButton("확인");
 		cencel = new JButton("취소");
 		
+		String[] chRadioName = {"빠냉이","두김이","무냉이","먹밥이"};
+		character = new JRadioButton[4];
+		chGroup = new ButtonGroup();
+		chIcon = new ImageIcon[4];
+		chLabel = new JLabel[4];
+		
 		jdialog.setLayout(null);
 		jdialog.setModal(true);
 		jdialog.setTitle("회원가입");
 		
-		jdialog.setSize(350,350);
+		jdialog.setSize(350,700);
 		idLabel.setBounds(30, 40, 50, 30);
 		pwdLabel.setBounds(30, 110, 50, 30);
 		pwdOkLabel.setBounds(30, 180, 50, 30);
@@ -82,8 +97,25 @@ public class SignUpForm implements UserForm{
 		pwdTF.setBounds(100, 110, 100, 30);
 		pwdOkTF.setBounds(100, 180, 100, 30);
 		isExist.setBounds(220, 40, 100, 30);
-		check.setBounds(130, 250, 80, 30);
-		cencel.setBounds(220, 250, 80, 30);
+		check.setBounds(130, 600, 80, 30);
+		cencel.setBounds(220, 600, 80, 30);
+		
+		for(int i = 0; i < character.length; i++) {
+			character[i] = new JRadioButton(chRadioName[i]);
+			chGroup.add(character[i]);
+			jdialog.add(character[i]);
+			
+			character[i].setBounds(30, 250+i*80, 100, 60);
+			
+			chIcon[i] = new ImageIcon(getClass().getResource("..\\Resource\\ch"+(i+1)+".png"));
+			chLabel[i] = new JLabel(chIcon[i]);
+			jdialog.add(chLabel[i]);
+			
+			chLabel[i].setBounds(100, 250+i*80, 120, 60);
+			
+		}
+		character[0].setSelected(true);
+		
 		
 		jdialog.add(idLabel);
 		jdialog.add(pwdLabel);
@@ -164,11 +196,14 @@ public class SignUpForm implements UserForm{
 					getDialog("패스워드가 다릅니다", 250, 100);
 					pwdTF.requestFocus();
 				}else {
+					String selectedCharacter = findChLabel();
+					System.out.println("selectedCharacter : " + selectedCharacter);
 					//1. json data를 만든다.
 					String sendData = "{";
 					sendData += userMessageProcessor.getJSONData("method", "1200");
 					sendData += "," + userMessageProcessor.getJSONData("id", idTF.getText());
 					sendData += "," + userMessageProcessor.getJSONData("pwd", String.valueOf(pwdTF.getPassword()));
+					sendData += "," + userMessageProcessor.getJSONData("ch", selectedCharacter);
 					sendData += "}";
 					//2. 서버로 보낸다.
 					unt.setInputData(sendData);
@@ -247,5 +282,16 @@ public class SignUpForm implements UserForm{
 	public void operation(String data) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public String findChLabel() {
+		int res = 0;
+		for(int i = 0; i < character.length; i++) {
+			if(character[i].isSelected()) {
+				res = i;
+				break;
+			}
+		}
+		return String.valueOf(res);
 	}
 }

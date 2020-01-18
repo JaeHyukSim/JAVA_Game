@@ -47,7 +47,6 @@ public class PasswordDialog extends JDialog implements ActionListener{
 			
 			b1.addActionListener(this);
 			b2.addActionListener(this);
-			System.out.println("pwdDialog.roomId: "+roomId);
 		}
 		
 		@Override

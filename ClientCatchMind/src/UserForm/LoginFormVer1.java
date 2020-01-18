@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -272,7 +273,6 @@ public class LoginFormVer1 implements UserForm{
 		loginOkLabel.add(expLabel);
 		loginOkLabel.add(chLabel);
 		
-		loginOkLabel.add(changeInfo);
 		loginOkLabel.add(withdrawal);
 		loginOkLabel.add(logout);
 	}
@@ -393,6 +393,22 @@ public class LoginFormVer1 implements UserForm{
 				unt.pushMessage();
 			}
 		});
+		
+		withdrawal.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int sel = JOptionPane.showConfirmDialog(jpanel, "정보를 삭제하시겠습니까?", "삭제하기", JOptionPane.YES_NO_OPTION);
+				if(sel == JOptionPane.YES_OPTION) {
+					JSONObject json = new JSONObject();
+					json.put("method", "1500");
+					
+					//13. 데이터를 서버로 보냅니다!
+					unt.setInputData(String.valueOf(json));
+					unt.pushMessage();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -465,6 +481,13 @@ public class LoginFormVer1 implements UserForm{
 			displayThread.getCardLayout().show(displayThread.getContentPane(), "login");
 			break;
 		case "1402": //logout request is accepted
+			card.show(loginPanel, "inputPanel");
+			init();
+			gameStartBtn.setEnabled(false);
+			break;
+		case "1502": // remove ok
+			
+			JOptionPane.showMessageDialog(jpanel, "삭제되었습니다. BYE~");
 			card.show(loginPanel, "inputPanel");
 			init();
 			gameStartBtn.setEnabled(false);
