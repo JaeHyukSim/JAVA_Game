@@ -103,6 +103,7 @@ public class LoginFormVer1 implements UserForm{
 	private JButton withdrawal;
 	private JButton logout;
 	
+	private ImageIcon[] chImage;
 	
 	//6. 생성자를 만듭니다!!! - private인 것을 주의합시다!!!
 	private LoginFormVer1(DisplayThread dt, Socket socket) {
@@ -128,7 +129,7 @@ public class LoginFormVer1 implements UserForm{
 		gameStartBtnIconPressed = new ImageIcon(getClass().getResource("..\\Resource\\gameStartButton_pressed.png"));
 
 		gameStartBtn = new JButton(gameStartBtnIcon);
-
+		
 		card = new CardLayout();
 
 		inputPanel = new JPanel();
@@ -163,6 +164,11 @@ public class LoginFormVer1 implements UserForm{
 		withdrawal = new JButton("회원 탈퇴");
 		logout = new JButton("로그아웃");
 		
+		chImage = new ImageIcon[4];
+		
+		for(int i = 0; i < chImage.length; i++) {
+			chImage[i] = new ImageIcon(getClass().getResource("..\\Resource\\ch" + (i+1) + ".png"));
+		}
 		
 		//8.  다음과 같이 Thread를 만들어 줍니다
 		userRunnable = unt;
@@ -524,7 +530,8 @@ public class LoginFormVer1 implements UserForm{
 		labelTextChange(welcomeLabel, "\"" + id + "\"" + "님 환영합니다!");
 		labelTextChange(lvLabel, lv);
 		labelTextChange(expLabel, exp);
-		labelTextChange(chLabel, ch);
+		//labelTextChange(chLabel, ch);
+		chLabel.setIcon(chImage[Integer.parseInt(ch)]);
 	}
 	
 	public void labelTextChange(JLabel l, String d) {

@@ -90,6 +90,7 @@ public class SignUpForm implements UserForm{
 		jdialog.setTitle("회원가입");
 		
 		jdialog.setSize(350,700);
+		jdialog.setLocation(600, 300);
 		idLabel.setBounds(30, 40, 50, 30);
 		pwdLabel.setBounds(30, 110, 50, 30);
 		pwdOkLabel.setBounds(30, 180, 50, 30);
@@ -99,6 +100,7 @@ public class SignUpForm implements UserForm{
 		isExist.setBounds(220, 40, 100, 30);
 		check.setBounds(130, 600, 80, 30);
 		cencel.setBounds(220, 600, 80, 30);
+		jd.setBounds(800, 700, 0, 0);
 		
 		for(int i = 0; i < character.length; i++) {
 			character[i] = new JRadioButton(chRadioName[i]);
@@ -271,6 +273,7 @@ public class SignUpForm implements UserForm{
 	 * pwdOkTF;
 	 */
 	public void dialogClear() {
+		inputedId = "";
 		idTF.setText(""); pwdTF.setText(""); pwdOkTF.setText("");
 	}
 	@Override
