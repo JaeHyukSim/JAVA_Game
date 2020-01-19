@@ -13,7 +13,7 @@ public class RoomData {
 	private String roomPass;
 	private String roomState; // 게임중인지 아닌지
 	private String roomPassState; // 비밀번호 boolean
-	private String totalRound;
+	private String maxRound;
 	private String currentRound;
 	
 	public RoomData() {
@@ -27,15 +27,15 @@ public class RoomData {
 		IdOfMasterUser = "#";
 		roomState = "waiting";
 		roomPassState = "none";
-		totalRound = "5";
-		currentRound = "0";
+		maxRound = "5";
+		currentRound = "1";
 	}
 	
 	public boolean isAllReady() {
 		if(countOfCurrentUser.equals("1")) {
 			return false;
 		}
-		if(countOfCurrentUser.equals(String.valueOf(Integer.parseInt(countOfReadyUser) - 1))) {
+		if(countOfCurrentUser.equals(String.valueOf(Integer.parseInt(countOfReadyUser) + 1))) {
 			return true;
 		}else {
 			return false;
@@ -130,12 +130,12 @@ public class RoomData {
 		this.userList = userList;
 	}
 
-	public String getTotalRound() {
-		return totalRound;
+	public String getMaxRound() {
+		return maxRound;
 	}
 
-	public void setTotalRound(String totalRound) {
-		this.totalRound = totalRound;
+	public void setMaxRound(String maxRound) {
+		this.maxRound = maxRound;
 	}
 
 	public String getCurrentRound() {
@@ -145,6 +145,5 @@ public class RoomData {
 	public void setCurrentRound(String currentRound) {
 		this.currentRound = currentRound;
 	}
-	
 	
 }

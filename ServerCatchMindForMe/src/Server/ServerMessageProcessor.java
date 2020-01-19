@@ -23,6 +23,7 @@ public class ServerMessageProcessor {
 	
 	private Station station;
 	
+	private String dataStream;
 	private String head; 
 	private String body; 
 	private String tail;
@@ -55,6 +56,7 @@ public class ServerMessageProcessor {
 		jsonParser = new JSONParser();
 		filePath = ServerMessageProcessor.class.getResource("").getPath();
 		System.out.println("FILEPATH : " + filePath);
+		dataStream = "";
 		head = "{ \"USER_DATA\" : [";
 		tail = "]}";
 		getFileData();
@@ -68,6 +70,14 @@ public class ServerMessageProcessor {
 			}
 		}
 		return uniqueInstance;
+	}
+	
+	public String getDataStream() {
+		return dataStream;
+	}
+
+	public void setDataStream(String dataStream) {
+		this.dataStream = dataStream;
 	}
 
 	public String getHead() {
@@ -109,6 +119,8 @@ public class ServerMessageProcessor {
 					str += tmp + '\n';
 					tmp = br.readLine();
 				}
+				
+				dataStream = head + body + tail;
 				try {
 					userData = (JSONObject)jsonParser.parse(str);
 				} catch (ParseException e) {
@@ -163,7 +175,7 @@ public class ServerMessageProcessor {
 		// 1. 유저가 속한 방을 알고 싶을 때	-> sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
 		// 2. *** RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
 		// 3. 모든 사람이 레디했는지 알고 싶을 때 : rd.isAllReady() -> boolean을 return
-		int index; RoomData rd;
+		RoomData rd; int index;
 		
 		
 		String res = "";
@@ -206,6 +218,8 @@ public class ServerMessageProcessor {
 							
 							sfu.setId((String)((JSONObject)originalArray.get(i)).get("id"));
 							sfu.setLv((String)((JSONObject)originalArray.get(i)).get("lv"));
+							sfu.setExp((String)((JSONObject)originalArray.get(i)).get("exp"));
+							sfu.setCh((String)((JSONObject)originalArray.get(i)).get("ch"));
 							System.out.println("method:1002" + ",sendData:" + sendData);
 							sfu.getStation().unicastObserver(sendData, sfu);
 							return sendData;
@@ -260,6 +274,7 @@ public class ServerMessageProcessor {
 				body += "," + getJSONData("ch", String.valueOf(jsonObj.get("ch")));
 				body += "," + getJSONData("friendList", "[]");
 				body += "}";
+				dataStream = head + body + tail;
 				System.out.println("body : " + body);
 				JSONObject addedJSON = (JSONObject)jsonParser.parse(body);
 				originalArray.add(addedJSON);
@@ -391,8 +406,6 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				sfu.getStation().unicastObserver(sendData, sfu);
 				
-				initSlidingWindow();
-				
 				//3. wait room data init - for other user
 				sendData = getAllListData(sfu);
 				sfu.getStation().broadcastWaitObserver(sendData);
@@ -401,9 +414,24 @@ public class ServerMessageProcessor {
 				sendData = getAllGameData(sfu);
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				
+				//5. Notice who is master
+				sendData = messageInitReady(sfu);
+				sfu.getStation().unicastObserver(sendData, sfu);
+				sendData = messageForMaster(sfu);
+				sfu.getStation().unicastObserver(sendData, sfu); // have to set text
+				sendData = messageIAmMaster(sfu);
+				index = 0;
+				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				for(int i = 0; i < rd.getUserList().size(); i++) {
+					if(rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
+						index = i;
+						break;
+					}
+				}
+				
+				sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
 				return sendData;
 			case "3010": // get room enter!
-				
 				index = Integer.parseInt((String)jsonObj.get("room"));
 				if(index == -1) {
 					return sendData;
@@ -449,13 +477,30 @@ public class ServerMessageProcessor {
 				// 3. find room and register
 				rd.addUserList(sfu);
 				sfu.setRoomId(rd.getNumberOfRoom());
-				
+				sfu.setReadyState("0");
 				// 4. init all thing
 				sendData = getAllListData(sfu);
 				sfu.getStation().broadcastWaitObserver(sendData);
 				sendData = getAllGameData(sfu);
 				sfu.getStation().broadcastRoomObserver(sendData, rd.getNumberOfRoom());
 				
+				// 5. Notice room state
+				sendData = messageForMaster(sfu);
+				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				
+				sendData = messageIAmMaster(sfu);
+				index = 0;
+				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				for(int i = 0; i < rd.getUserList().size(); i++) {
+					if(rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
+						index = i;
+						break;
+					}
+				}
+				
+				sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
+				sendData = messageAllReady(sfu);
+				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;
 			case "3400": // init room
 				//해당 방은 sfu.getStation().getRoom
@@ -517,6 +562,7 @@ public class ServerMessageProcessor {
 				
 				//broadcast data to all (room) 1. find room 2. broadcast
 				if(isExistRoom == true) {
+					
 					sendData = getAllGameData(sfu);
 					
 					if(sendData == "NO") {
@@ -526,14 +572,30 @@ public class ServerMessageProcessor {
 					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 					
 					if(rd.getIdOfMasterUser().equals(sfu.getId())) {
+						System.out.println("out master");
 						rd.setIdOfMasterUser(rd.getUserList().get(0).getId());
-						//sendData who is master?
-						sendData = messageForMaster(rd);
+						//sendData who is master? + init all ready state
+						sendData = messageInitReady(sfu);
 						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 					}
+					sendData = messageForMaster(sfu);
+					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					sendData = messageIAmMaster(sfu);
+					index = 0;
+					for(int i = 0; i < rd.getUserList().size(); i++) {
+						if(rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
+							index = i;
+							break;
+						}
+					}
+					sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
+					sendData = messageAllReady(sfu);
+					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				}
 				sfu.setRoomId("0");
-				sfu.setReadyState("0");
+				if(sfu.getReadyState().equals("1")) {
+					sfu.setReadyState("0");
+				}
 				return sendData;
 			case "3700": //DRAW - get draw coordinate - x, y
 				//1. don't use graphic algorithm
@@ -547,7 +609,6 @@ public class ServerMessageProcessor {
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;
 			case "3710": // DRAW - clear all
-				initSlidingWindow();
 				sendData = "{";
 				sendData += getJSONData("method", "3712");
 				sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
@@ -579,6 +640,24 @@ public class ServerMessageProcessor {
 				
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				
+				return sendData;
+			case "3900": //ready
+				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				if(sfu.getId().equals(rd.getIdOfMasterUser())) {
+					if(rd.isAllReady() == true) {
+						System.out.println("GameStart");
+					}else {
+						json.clear();
+						json.put("method", "3914");
+						sendData = String.valueOf(json);
+						sfu.getStation().unicastObserver(sendData, sfu);
+					}
+				}else {
+					sendData = messageReady(sfu);
+					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+				}
+				System.out.println("currentUser : " + rd.getCountOfCurrentUser());
+				System.out.println("readyUser : " + rd.getCountOfReadyUser());
 				return sendData;
 			}
 			
@@ -742,23 +821,88 @@ public class ServerMessageProcessor {
 	}
 	
 	//who is master?
-	public String messageForMaster(RoomData rd) {
+	public String messageForMaster(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		int index = 0;
+		for(int i = 0; i < rd.getUserList().size(); i++) {
+			if(rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
+				index = i;
+				break;
+			}
+		}
 		String sendData = "{";
 		sendData += getJSONData("method", "3902");
-		sendData += "," + getJSONData("master", rd.getIdOfMasterUser());
+		sendData += "," + getJSONData("master", String.valueOf(index));
 		sendData += "}";
 		return sendData;
 		
 	}
-	public void initSlidingWindow() {
-		for(int i = 0; i < 2; i++) {
-			for(int j = 0; j < 2; j++) {
-				slidingWindow[i][j] = 100000;
+	//I am a master
+	public String messageIAmMaster(ServerFromUser sfu) {
+		String sendData = "{";
+		sendData += getJSONData("method", "3912");
+		sendData += "}";
+		return sendData;
+	}
+	//init all ready state
+	public String messageInitReady(ServerFromUser sfu) {
+		//1. init ready
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		for(int i = 0; i < rd.getUserList().size(); i++) {
+			rd.getUserList().get(i).setReadyState("0");
+		}
+		rd.setCountOfReadyUser("0");
+		
+		json.clear();
+		json.put("method", "3903");
+		return String.valueOf(json);
+	}
+	//ready now - me
+	public String messageReady(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		int index = 0;
+		for(int i = 0; i < rd.getUserList().size(); i++) {
+			if(sfu.getId().equals(rd.getUserList().get(i).getId())) {
+				index = i;
+				break;
 			}
 		}
-		slidingWindowPointer = 0;
+		json.clear();
+		json.put("id", String.valueOf(index));
+		//1. my ready state init
+		//1.1 i was ready
+		if(sfu.getReadyState().equals("1")) {
+			sfu.setReadyState("0");
+			rd.setCountOfReadyUser(String.valueOf(Integer.parseInt(rd.getCountOfReadyUser())-1));
+			json.put("method", "3904");
+		}else {
+			sfu.setReadyState("1");
+			rd.setCountOfReadyUser(String.valueOf(Integer.parseInt(rd.getCountOfReadyUser())+1));
+			json.put("method", "3905");
+		}
+		return String.valueOf(json);
 	}
-	
+	//Notice who are ready
+	public String messageAllReady(ServerFromUser sfu) {
+		boolean isOperation = false;
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		String sendData = "{";
+		sendData += getJSONData("method", "3906");
+		sendData += "," + "\"readyUserList\":[";
+		for(int i = 0; i < rd.getUserList().size(); i++) {
+			if(rd.getUserList().get(i).getReadyState().equals("1")) {
+				if(isOperation == true) {
+					sendData += ",";
+				}
+				isOperation = true;
+				sendData += "{";
+				sendData += getJSONData("id", String.valueOf(i));
+				sendData += "}";
+			}
+		}
+		sendData += "]}";
+		return sendData;
+	}
 	//remove member method
 	public void removeMember(ServerFromUser sfu) {
 		//1. remove from file
