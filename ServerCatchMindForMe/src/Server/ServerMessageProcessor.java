@@ -600,6 +600,14 @@ public class ServerMessageProcessor {
 			case "3700": //DRAW - get draw coordinate - x, y
 				//1. don't use graphic algorithm
 				
+				//Gaming && not examiner -> can't draw
+				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				if(rd.getRoomState().equals("gaming")) {
+					if(!sfu.getId().equals(rd.getUserList().get(Integer.parseInt(rd.getExaminer())).getId())) {
+						return sendData;
+					}
+				}
+				
 				sendData = "{";
 				sendData += getJSONData("method", "3702");
 				sendData += "," + getJSONData("x", (String)jsonObj.get("x"));
@@ -609,6 +617,15 @@ public class ServerMessageProcessor {
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;
 			case "3710": // DRAW - clear all
+				
+				//Gaming && not examiner -> can't draw
+				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				if(rd.getRoomState().equals("gaming")) {
+					if(!sfu.getId().equals(rd.getUserList().get(Integer.parseInt(rd.getExaminer())).getId())) {
+						return sendData;
+					}
+				}
+				
 				sendData = "{";
 				sendData += getJSONData("method", "3712");
 				sendData += "," + getJSONData("color", (String)jsonObj.get("color"));
@@ -622,7 +639,22 @@ public class ServerMessageProcessor {
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;
 			case "3309":	// game room chat
-				rd = sfu.getStation().getRoomUserList().get(sfu.getStation().findRoomObserver(sfu.getRoomId()));
+				
+				//Gaming && not examiner -> can't draw
+				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				System.out.println("3309 : examiner index : " + rd.getExaminer());
+				if(rd.getRoomState().equals("gaming")) {
+					if(sfu.getId().equals(rd.getUserList().get(Integer.parseInt(rd.getExaminer())).getId())) {
+						return sendData;
+					}
+					if(String.valueOf(jsonObj.get("message")).equals(rd.getAnswerList()[Integer.parseInt(rd.getCurrentRound())-1])) {
+						System.out.println("answer ok!");
+						sendData = messageRoundEnd(sfu);
+						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					}
+				}
+				
+				//rd = sfu.getStation().getRoomUserList().get(sfu.getStation().findRoomObserver(sfu.getRoomId()));
 				index = -1;
 				for(int i = 0; i < rd.getUserList().size(); i++) {
 					if(rd.getUserList().get(i).equals(sfu)) {
@@ -643,9 +675,24 @@ public class ServerMessageProcessor {
 				return sendData;
 			case "3900": //ready
 				rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+				if(rd.getRoomState().equals("gaming")) {
+					return sendData;
+				}
+				
+				
 				if(sfu.getId().equals(rd.getIdOfMasterUser())) {
 					if(rd.isAllReady() == true) {
+						//1. init timer 2. generate 10 answers 3. change room state
+						//1. init timer method
+						//2. generate 10 answers method
+						//3. change room state method
+						//4. set method : 3922
 						System.out.println("GameStart");
+						sendData = messageGameStart(sfu);
+						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						//5. round start method
+						sendData = messageRoundStart(sfu); // broadcast ok...
+						
 					}else {
 						json.clear();
 						json.put("method", "3914");
@@ -916,5 +963,155 @@ public class ServerMessageProcessor {
 		
 		//2. remove from userList
 		sfu.setId("#");
+	}
+	
+	public void setRandomAnswers(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		boolean isOk = false;
+		String pickedAns ="";
+		
+		//1. DB에서 가져온다
+		String[] ans = {"사람","하늘","코끼리","바다사자","연필","남준우","지우개","개새","메가커피","울트라바이올렛"};
+		//2. 랜덤으로 숫자를 10개 뽑는다.
+		for(int i = 0; i < ans.length; i++) {
+			isOk = true;
+			while(isOk) {
+				isOk = false;
+				pickedAns = ans[(int)(Math.random()*ans.length)];
+				for(int j = 0; j < i; j++) {
+					if(rd.getAnswerList()[j].equals(pickedAns)) {
+						isOk = true;	break;
+					}
+				}
+			}
+			rd.getAnswerList()[i] = pickedAns;
+		}
+	}
+	public void changeRoomState(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		if(rd.getRoomState().equals("waiting")) {
+			rd.setRoomState("gaming");
+		}else {
+			rd.setRoomState("waiting");
+		}
+	}
+	public void initRoomRount(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		rd.setCurrentRound("0");
+	}
+	public void nextRoomRound(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		rd.setCurrentRound(String.valueOf(Integer.parseInt(rd.getCurrentRound())+1));
+	}
+	public void initExaminer(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		rd.setExaminer("0");
+	}
+	public String setExaminer(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		rd.setExaminer(String.valueOf((Integer.parseInt(rd.getExaminer())+1)%Integer.parseInt(rd.getCountOfCurrentUser())));
+		String index = "";
+		index = rd.getExaminer();
+		return index;
+	}
+	
+	//1. Game Start Method
+	public String messageGameStart(ServerFromUser sfu) {
+		json.clear();
+		//1. init timer
+		//2. init answer
+		setRandomAnswers(sfu);
+		//3. init room state
+		changeRoomState(sfu);
+		json.put("method", "3922");
+		
+		initRoomRount(sfu);
+		initExaminer(sfu);
+		return String.valueOf(json);
+	}
+	//2. Round Start Method
+	public String messageRoundStart(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		json.clear();
+		String index = setExaminer(sfu);
+		json.put("method", "3932");
+		json.put("examiner", index);
+		nextRoomRound(sfu);
+		json.put("round", rd.getCurrentRound());
+		
+		String tmpAns = "";
+		for(int i = 0; i < rd.getAnswerList()[Integer.parseInt(rd.getCurrentRound())-1].length(); i++) {
+			tmpAns += "●";
+		}
+		ArrayList<Observer> user = rd.getUserList();
+		for(int i = 0; i < user.size(); i++) {
+			if(user.get(i).getId().equals(user.get(Integer.parseInt(rd.getExaminer())).getId() )) {
+				json.put("ans", rd.getAnswerList()[Integer.parseInt(rd.getCurrentRound())-1]);
+				json.put("you", "yes");
+				sfu.getStation().unicastObserver(String.valueOf(json), user.get(i));
+			}else {
+				json.put("ans", tmpAns);
+				json.put("you", "no");
+				sfu.getStation().unicastObserver(String.valueOf(json), user.get(i));
+			}
+		}
+		return String.valueOf(json);
+	}
+	//3. Round End Method - when : 1. when out examiner 2. catch answer 3. timer over
+	public String messageRoundEnd(ServerFromUser sfu) {
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		//1. init timer
+		json.clear();
+		json.put("ans", rd.getAnswerList()[Integer.parseInt(rd.getCurrentRound())-1]);
+		json.put("method", "3942");
+		
+		Runnable r = new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				finally{
+					if(rd.getCurrentRound().equals(rd.getMaxRound())) {
+						System.out.println("game end!");
+						messageGameEnd(sfu);
+						Thread.interrupted();
+					}else {
+						messageRoundStart(sfu);
+						Thread.interrupted();
+					}
+				}
+			}
+		};
+		Thread t = new Thread(r);
+		t.start();
+		
+		return String.valueOf(json);
+	}
+	
+	//Game End Method
+	public String messageGameEnd(ServerFromUser sfu) {
+		//1. change room state
+		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		changeRoomState(sfu);
+		String sendData = messageInitReady(sfu);
+		sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+		sendData = messageForMaster(sfu);
+		sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+		sendData = messageIAmMaster(sfu);
+		int index = 0;
+		for(int i = 0; i < rd.getUserList().size(); i++) {
+			if(rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
+				index = i;
+				break;
+			}
+		}
+		sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
+		return sendData;
 	}
 }

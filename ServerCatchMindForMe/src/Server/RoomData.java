@@ -15,6 +15,8 @@ public class RoomData {
 	private String roomPassState; // 비밀번호 boolean
 	private String maxRound;
 	private String currentRound;
+	private String[] answerList;
+	private String examiner;
 	
 	public RoomData() {
 		userList = new ArrayList<Observer>();
@@ -27,8 +29,10 @@ public class RoomData {
 		IdOfMasterUser = "#";
 		roomState = "waiting";
 		roomPassState = "none";
-		maxRound = "5";
+		maxRound = "10";
 		currentRound = "1";
+		answerList = new String[10];
+		examiner = "0";
 	}
 	
 	public boolean isAllReady() {
@@ -144,6 +148,22 @@ public class RoomData {
 
 	public void setCurrentRound(String currentRound) {
 		this.currentRound = currentRound;
+	}
+
+	public String[] getAnswerList() {
+		return answerList;
+	}
+
+	public String getExaminer() {
+		return examiner;
+	}
+
+	public void setAnswerList(String[] answerList) {
+		this.answerList = answerList;
+	}
+
+	public void setExaminer(String examiner) {
+		this.examiner = examiner;
 	}
 	
 }

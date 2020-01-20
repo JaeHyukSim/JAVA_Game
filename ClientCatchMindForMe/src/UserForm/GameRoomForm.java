@@ -67,7 +67,9 @@ public class GameRoomForm extends JPanel implements UserForm {
 	JPanel timer = new JPanel();
 	JPanel turn = new JPanel();
 	JPanel answer = new JPanel();
+	JLabel answerLabel = new JLabel();
 	JPanel round = new JPanel();
+	JLabel roundLabel = new JLabel();
 	JButton[] b = new JButton[4];
 	JPanel p = new JPanel();
 	JLabel[] label = new JLabel[24];
@@ -223,6 +225,8 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       ((TitledBorder) thr).setTitleColor(colorout);
        answer.setBorder(thr);
       
+       answerLabel.setBounds(10,315 , 525, 100);
+       answer.add(answerLabel);
       Label label = new Label(); 
       label.setBounds(0, 0, 250, 50);
       label.setFont(font2);
@@ -260,6 +264,12 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       round.setLayout(null);
       round.setBackground(color);
       round.add(timeBar);
+      
+      
+      //timer.setBounds(15, 630, 250, 150);
+      roundLabel.setBounds(10,315,230,100);
+      timer.add(roundLabel);
+      
       timeBar.setEnabled(true);
       Border four =  BorderFactory.createTitledBorder(new LineBorder(colorout,3),"타이머");
       ((TitledBorder) four).setTitleJustification(TitledBorder.CENTER);
@@ -501,6 +511,40 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 				break;
 			case "3912":
 				b[0].setText("게임시작");
+				break;
+			case "3922": //Game Start
+				que.push(10000, 0);
+				sketchPanel.setColor("whiteAll");
+				//1. init timer
+				//2. init paint
+				que.push(10000, 0);
+				//3. all user - black
+				for(int i = 0; i < 6; i++) {
+					userPanel[i].setBackground(color.BLACK);
+				}
+				break;
+			case "3932": //Round Start
+				que.push(10000, 0);
+				sketchPanel.setColor("whiteAll");
+				for(int i = 0; i < 6; i++) {
+					userPanel[i].setBackground(color.BLACK);
+				}
+				index = Integer.parseInt(String.valueOf(jsonObj.get("examiner")));
+				userPanel[index].setBackground(color.WHITE);
+				index = Integer.parseInt(String.valueOf(jsonObj.get("round")));
+				System.out.println("3932 index : " + index);
+				roundLabel.setText(String.valueOf(index + " / 10"));
+				answerLabel.setText(String.valueOf(jsonObj.get("ans")));
+				break;
+			case "3942": // Round End
+				que.push(10000, 0);
+				sketchPanel.setColor("whiteAll");
+				//init timer
+				for(int i = 0; i < 6; i++) {
+					userPanel[i].setBackground(color.YELLOW);
+				}
+				answerLabel.setText(String.valueOf(jsonObj.get("ans")));
+				break;
 			}
 		} catch (Exception e) {
 
@@ -523,5 +567,6 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 	public UserMessageProcessor getUserMessageProcessor() {
 		return userMessageProcessor;
 	}
-
+	
+	
 }
