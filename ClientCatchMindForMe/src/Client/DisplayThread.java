@@ -113,4 +113,5 @@ public class DisplayThread extends JFrame implements Runnable{
 	public void run() {
 		
 	}
+	
 }
