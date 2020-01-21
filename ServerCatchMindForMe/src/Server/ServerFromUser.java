@@ -48,6 +48,7 @@ public class ServerFromUser implements Runnable, Observer{
 		lv = "2";
 		ch = "2";
 		friends = new ArrayList<Observer>();
+		cnt = "0";
 		
 		this.station = station;
 		this.socket = socket;
@@ -80,15 +81,19 @@ public class ServerFromUser implements Runnable, Observer{
 			}
 		}catch(IOException e) {
 			System.out.println("in ServerFromUser - userMessage error");
-			station.removeObserver(this);
-			station.removeWaitObserver(this);
+			
+			String tmp;
 			
 			System.out.println("delete operation : room id : " + roomId);
 			if(roomId.equals("0") == false) {
 				System.out.println("delete operation ok! remove room target!");
-				station.removeRoomObserverTarget(roomId, this);
+				
+				tmp = "{\"method\":\"3600\"}";
+				tmp = serverMessageProcessor.processingServerMessage(tmp, this);
 			}
-			String tmp = "{\"method\":\"2070\"}";
+			station.removeObserver(this);
+			station.removeWaitObserver(this);
+			tmp = "{\"method\":\"2070\"}";
 			tmp = serverMessageProcessor.processingServerMessage(tmp, this);
 		}
 	}

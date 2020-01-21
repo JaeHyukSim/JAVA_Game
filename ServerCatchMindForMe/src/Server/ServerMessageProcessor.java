@@ -335,7 +335,7 @@ public class ServerMessageProcessor {
 				return sendData;
 			case "2070": // remove - find index
 				sendData = getAllListData(sfu);
-				sfu.getStation().broadcastObserver(sendData);
+				sfu.getStation().broadcastWaitObserver(sendData);
 				return sendData;
 			case "2400":	//out from waiting room
 				sfu.getStation().removeWaitObserver(sfu); // remove user from waiting room
@@ -411,6 +411,7 @@ public class ServerMessageProcessor {
 				sfu.getStation().broadcastWaitObserver(sendData);
 				
 				//4. room register!
+				sfu.setCnt("0");
 				sendData = getAllGameData(sfu);
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				
@@ -489,6 +490,7 @@ public class ServerMessageProcessor {
 				// 4. init all thing
 				sendData = getAllListData(sfu);
 				sfu.getStation().broadcastWaitObserver(sendData);
+				sfu.setCnt("0");
 				sendData = getAllGameData(sfu);
 				sfu.getStation().broadcastRoomObserver(sendData, rd.getNumberOfRoom());
 				
@@ -572,36 +574,52 @@ public class ServerMessageProcessor {
 				if(isExistRoom == true) {
 					
 					sendData = getAllGameData(sfu);
-					
-					if(sendData == "NO") {
-						System.out.println("ServerMessageProcessor - getAllGameData : NO");
-						return sendData;
-					}
 					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 					
-					if(rd.getIdOfMasterUser().equals(sfu.getId())) {
-						System.out.println("out master");
-						rd.setIdOfMasterUser(rd.getUserList().get(0).getId());
-						//sendData who is master? + init all ready state
-						sendData = messageInitReady(sfu);
-						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-					}
-					sendData = messageForMaster(sfu);
-					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
-					sendData = messageIAmMaster(sfu);
-					index = 0;
-					for(int i = 0; i < rd.getUserList().size(); i++) {
-						if(rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
-							index = i;
-							break;
+					if(rd.getRoomState().equals("gaming")) {
+						//1. the people getting out is a master
+						
+						if(rd.getIdOfMasterUser().equals(sfu.getId())) {
+							rd.setIdOfMasterUser(rd.getUserList().get(0).getId());
+						}
+						////////////////////////////////////////////////////
+						ServerFromUser man = (ServerFromUser)rd.getUserList().get(0);
+						////////////////////////////////////////////////////
+						//3. rest people count == 1
+						if(rd.getCountOfCurrentUser().equals("1")) {
+							// game over
+							messageGameEnd(man);
+						}else {
+							sendData = messageRoundEnd(man);
+							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 						}
 					}
-					sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
-					sendData = messageAllReady(sfu);
-					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					//if the man is a master - waiting state
+					if (rd.getRoomState().equals("waiting")) {
+						if (rd.getIdOfMasterUser().equals(sfu.getId())) {
+							System.out.println("out master");
+							rd.setIdOfMasterUser(rd.getUserList().get(0).getId());
+							// sendData who is master? + init all ready state
+							sendData = messageInitReady(sfu);
+							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						}
+						sendData = messageForMaster(sfu);
+						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						sendData = messageIAmMaster(sfu);
+						index = 0;
+						for (int i = 0; i < rd.getUserList().size(); i++) {
+							if (rd.getIdOfMasterUser().equals(rd.getUserList().get(i).getId())) {
+								index = i;
+								break;
+							}
+						}
+						sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
+						sendData = messageAllReady(sfu);
+						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					}
 				}
 				sfu.setRoomId("0");
-				if(sfu.getReadyState().equals("1")) {
+				if (sfu.getReadyState().equals("1")) {
 					sfu.setReadyState("0");
 				}
 				return sendData;
@@ -656,9 +674,14 @@ public class ServerMessageProcessor {
 						return sendData;
 					}
 					if(String.valueOf(jsonObj.get("message")).equals(rd.getAnswerList()[Integer.parseInt(rd.getCurrentRound())-1])) {
-						System.out.println("answer ok!");
-						sendData = messageRoundEnd(sfu);
-						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						if(rd.getIsAnswer().equals("true")) {
+							System.out.println("answer ok!");
+							sfu.setCnt(String.valueOf(Integer.parseInt(sfu.getCnt()) + 1));
+							sendData = getAllGameData(sfu);
+							sfu.getStation().broadcastRoomObserver(sendData, rd.getNumberOfRoom());
+							sendData = messageRoundEnd(sfu);
+							sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						}
 					}
 				}
 				
@@ -868,6 +891,7 @@ public class ServerMessageProcessor {
 			sendData += "," + getJSONData("lv", usr.get(i).getLv());
 			sendData += "," + getJSONData("ch", usr.get(i).getCh());
 			sendData += "," + getJSONData("exp", usr.get(i).getExp());
+			sendData += "," + getJSONData("cnt", usr.get(i).getCnt());
 			sendData += "}";
 			if(i != usr.size()-1) {
 				sendData += ",";
@@ -1052,6 +1076,7 @@ public class ServerMessageProcessor {
 	//2. Round Start Method
 	public String messageRoundStart(ServerFromUser sfu) {
 		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		rd.setIsAnswer("true");
 		json.clear();
 		String index = setExaminer(sfu);
 		json.put("method", "3932");
@@ -1080,6 +1105,7 @@ public class ServerMessageProcessor {
 	//3. Round End Method - when : 1. when out examiner 2. catch answer 3. timer over
 	public String messageRoundEnd(ServerFromUser sfu) {
 		RoomData rd = sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
+		rd.setIsAnswer("false");
 		//1. init timer
 		json.clear();
 		json.put("ans", rd.getAnswerList()[Integer.parseInt(rd.getCurrentRound())-1]);
@@ -1121,6 +1147,14 @@ public class ServerMessageProcessor {
 		changeRoomState(sfu);
 		String sendData = getAllListData(sfu);
 		sfu.getStation().broadcastWaitObserver(sendData); 
+		//round, answer, cnt 초기화
+		ArrayList<Observer> users = rd.getUserList();
+		for(int i = 0; i < users.size(); i++) {
+			users.get(i).setCnt("0");
+		}
+		sendData = getAllGameData(sfu);
+		sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+		
 		sendData = messageInitReady(sfu);
 		sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 		sendData = messageForMaster(sfu);

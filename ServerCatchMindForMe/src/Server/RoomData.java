@@ -17,6 +17,7 @@ public class RoomData {
 	private String currentRound;
 	private String[] answerList;
 	private String examiner;
+	private String isAnswer;
 	
 	public RoomData() {
 		userList = new ArrayList<Observer>();
@@ -164,6 +165,14 @@ public class RoomData {
 
 	public void setExaminer(String examiner) {
 		this.examiner = examiner;
+	}
+
+	public String getIsAnswer() {
+		return isAnswer;
+	}
+
+	public void setIsAnswer(String isAnswer) {
+		this.isAnswer = isAnswer;
 	}
 	
 }

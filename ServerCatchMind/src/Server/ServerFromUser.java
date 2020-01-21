@@ -183,6 +183,4 @@ public class ServerFromUser implements Runnable, Observer{
 	public void setFriends(ArrayList<Observer> friends) {
 		this.friends = friends;
 	}
-	
-	
 }

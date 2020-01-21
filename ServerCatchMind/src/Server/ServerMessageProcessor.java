@@ -540,6 +540,9 @@ public class ServerMessageProcessor {
 				}
 				sfu.setRoomId("0");
 				sfu.setReadyState("0");
+				int currReadyUser = Integer.parseInt(rd.getCountOfReadyUser());
+				currReadyUser--;
+				rd.setCountOfReadyUser(String.valueOf(currReadyUser));
 				return sendData;
 			case "3700": //DRAW - get draw coordinate - x, y
 				//1. don't use graphic algorithm
@@ -599,6 +602,9 @@ public class ServerMessageProcessor {
 				}
 				if(sfu.getReadyState().equals("0")) {
 					sfu.setReadyState("1");
+					currReadyUser = Integer.parseInt(rd.getCountOfReadyUser());
+					currReadyUser++;
+					rd.setCountOfReadyUser(String.valueOf(currReadyUser));
 					sendData = "{";
 					sendData += getJSONData("method", "3READY_CLICKED");
 					sendData += "," + getJSONData("userNum", String.valueOf(index));
@@ -610,6 +616,9 @@ public class ServerMessageProcessor {
 				}
 				else if(sfu.getReadyState().equals("1")) {
 					sfu.setReadyState("0");
+					currReadyUser = Integer.parseInt(rd.getCountOfReadyUser());
+					currReadyUser--;
+					rd.setCountOfReadyUser(String.valueOf(currReadyUser));
 					sendData = "{";
 					sendData += getJSONData("method", "3READY_CLICKED");
 					sendData += "," + getJSONData("userNum", String.valueOf(index));

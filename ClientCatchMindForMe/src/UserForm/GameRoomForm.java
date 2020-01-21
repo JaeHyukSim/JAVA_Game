@@ -446,7 +446,7 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 					label[i].setIcon(chIcon[index]);
 					label[i + 6].setText(String.valueOf(((JSONObject) usr.get(i)).get("id")));
 					label[i + 12].setText(String.valueOf(((JSONObject) usr.get(i)).get("lv")));
-					label[i + 18].setText("0"); // score
+					label[i + 18].setText(String.valueOf(((JSONObject) usr.get(i)).get("cnt"))); // score
 				}
 				break;
 			case "3014": // rejected to enter the room
@@ -486,6 +486,8 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 				for (int i = 0; i < 6; i++) {
 					userPanel[i].setBackground(colorout);
 				}
+				roundLabel.setText("");
+				answerLabel.setText("");
 				break;
 			case "3904":
 				// ready off with id
