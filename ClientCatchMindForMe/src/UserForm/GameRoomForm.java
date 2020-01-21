@@ -322,15 +322,21 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       ////////////////////////////////////////////////
       ////////////////////////////////////////////////
       b[1].addActionListener(new ActionListener() {
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			if(e.getSource()==b[1])
-				
-			inviteDialog.setVisible(true); // b[1]을 클릭했을때 inviteDialog를 띄운다.
-		}
-	});
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == b[1]) {
+					// 서버로 보내봅시다.
+					// 1. 메소드를 정해봅시다. //
+					String sendData = "{";
+					sendData += userMessageProcessor.getJSONData("method", "3910");
+					sendData += "}";
+					// 13. 데이터를 서버로 보냅니다!
+					unt.setInputData(sendData);
+					unt.pushMessage();
+				}
+			}
+		});
       
       
       ////////////////////////////////////////////////
@@ -547,6 +553,39 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 				}
 				answerLabel.setText(String.valueOf(jsonObj.get("ans")));
 				break;
+			case "3920":
+
+				JSONArray inviteUsers = (JSONArray) (jsonObj.get("waitList"));
+
+				inviteDialog.initUserList();
+				for (int i = 0; i < inviteUsers.size(); i++) {
+					String id = String.valueOf(((JSONObject) inviteUsers.get(i)).get("id"));
+					String lv = String.valueOf(((JSONObject) inviteUsers.get(i)).get("lv"));
+					System.out.println("3920 : " + id + "," + lv);
+					inviteDialog.invitedUsers(id, lv);
+				}
+
+				inviteDialog.getDialog().setVisible(true);
+				break;
+
+			case "3970":
+				
+				String inviteId = String.valueOf(jsonObj.get("id"));
+				//int sel = JOptionPane.showConfirmDialog(this,inviteId + "님께서  초대를 거절하셨습니다."," ",JOptionPane.OK_OPTION);
+				JOptionPane.showMessageDialog(this, inviteId + "님이 초대를 거절하셨습니다.");
+				break;
+			case "3930":
+				inviteId = String.valueOf(jsonObj.get("id"));
+				JOptionPane.showMessageDialog(this, inviteId + "님이 대기실에 없습니다.");
+				
+				//1. 목록을 다시 띄운다 -> 서버한테 다시 목록을 달라 한다
+				//inviteDialog.setInviteDialogInvisible();
+				String sendData = "{";
+				sendData += userMessageProcessor.getJSONData("method", "3910");
+				sendData += "}";
+				// 13. 데이터를 서버로 보냅니다!
+				unt.setInputData(sendData);
+				unt.pushMessage();
 			}
 		} catch (Exception e) {
 
@@ -569,6 +608,8 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 	public UserMessageProcessor getUserMessageProcessor() {
 		return userMessageProcessor;
 	}
-	
-	
+
+	public UserInputThread getUnt() {
+		return unt;
+	}
 }
