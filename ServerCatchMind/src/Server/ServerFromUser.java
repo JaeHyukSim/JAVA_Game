@@ -79,7 +79,7 @@ public class ServerFromUser implements Runnable, Observer{
 				userMessage = serverMessageProcessor.processingServerMessage(userMessage, this);
 			}
 		}catch(IOException e) {
-			System.out.println("in ServerFromUser - userMessage error");
+			System.out.println("in ServerFromUser - userMessage error : " + userMessage);
 			station.removeObserver(this);
 			station.removeWaitObserver(this);
 			

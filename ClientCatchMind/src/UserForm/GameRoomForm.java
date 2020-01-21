@@ -82,6 +82,7 @@ public class GameRoomForm extends JPanel implements UserForm{
    Font font2 = new Font("Black Han Sans",Font.PLAIN,30);
    JTextField tf=new JTextField();
    JProgressBar jb;
+   TimeBar timeBar;
    
  //9. Singleton pattern의 유일한 instance를 만들기 위해 getInstance()메소드를 만듭니다.
  	public static GameRoomForm getInstance(DisplayThread dt, Socket socket) {
@@ -123,7 +124,6 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       // 채팅 표시할 텍스트 필드 할당
       for(int i=0; i<6; i++) {
     	  userChat[i] = new UserChat(i);
-    	  add(userChat[i]);
       }
       
       //1. 스케치북      
@@ -250,7 +250,7 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       add(tf);
       
       //7.타이머
-      TimeBar timeBar = new TimeBar(120);
+      timeBar = new TimeBar(120);
       round.setBounds(810, 630, 350, 70);
       round.setLayout(null);
       round.setBackground(color);
@@ -285,16 +285,8 @@ private GameRoomForm(DisplayThread dt, Socket socket){
          b[i+3] = new JButton("나가기");
       }
       
-      // 테스트 위해 임시로 만든 버튼 액션
-      b[0].addActionListener(new ActionListener() {
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			Thread t = new Thread(timeBar);
-			t.start();
-		}
-	});
+      
+      
       
       ////////////////////////////////////////////////
       ////////////////////////////////////////////////
@@ -387,6 +379,29 @@ public void actionPerformMethod() {
 		}
 	});
 	
+	(b[0]).addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			String sendData = "{";
+			sendData += userMessageProcessor.getJSONData("method", "READY_CLICK");
+			sendData += "}";
+			System.out.println("READY_CLICK : " + sendData);
+			if(b[0].getText().equals("게임시작")) {
+				
+			}
+			else if(b[0].getText().equals("게임준비")) {
+				b[0].setText("준비 중");
+			}
+			else {
+				b[0].setText("게임준비");
+			}
+			unt.setInputData(sendData);
+			unt.pushMessage();
+		}
+	});
+	
 }
 
 @Override
@@ -430,12 +445,37 @@ public void operation(java.lang.String data) {
 			//sketchPanel.initSlidingWindow();
 			break;
 		case "3300":
+		{
 			int userNum = Integer.parseInt(String.valueOf(jsonObj.get("userNum")));
 			System.out.println("3300 userNum : " + userNum);
 			String message = String.valueOf(jsonObj.get("message"));
-			userChat[userNum].printChat(message);
+			userChat[userNum].printChat(displayThread.getX(), displayThread.getY(), message);
 			break;
 		}
+		case "3READY_CLICKED":
+		{
+			userNum = Integer.parseInt(String.valueOf(jsonObj.get("userNum")));
+			String readyState = jsonObj.get("readyState").toString();
+			if(readyState.equals("0")) {
+				userPanel[userNum].setBackground(colorout);
+			}
+			else {
+				userPanel[userNum].setBackground(Color.green);
+			}
+			break;
+		}
+		case "3GAME_START":
+		{
+			b[0].setText("게임 중");
+			b[0].setEnabled(true);
+			timeBar.run();
+		}
+		case "3MASTER":
+		{
+			b[0].setText("게임시작");
+		}
+		}
+		
 	}catch(Exception e) {
 		
 	}

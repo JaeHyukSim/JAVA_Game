@@ -401,6 +401,12 @@ public class ServerMessageProcessor {
 				sendData = getAllGameData(sfu);
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				
+				sfu.setReadyState("2");
+				sendData = "{";
+				sendData += getJSONData("method", "3MASTER");
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, sfu);
+				
 				return sendData;
 			case "3010": // get room enter!
 				
@@ -579,6 +585,55 @@ public class ServerMessageProcessor {
 				
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				
+				return sendData;
+			case "READY_CLICK":
+				rd = sfu.getStation().getRoomUserList().get(sfu.getStation().findRoomObserver(sfu.getRoomId()));
+				index = -1;
+				for(int i = 0; i < rd.getUserList().size(); i++) {
+					if(rd.getUserList().get(i).equals(sfu)) {
+						index = i;
+					}
+				}
+				if(index == -1) {
+					return sendData;
+				}
+				if(sfu.getReadyState().equals("0")) {
+					sfu.setReadyState("1");
+					sendData = "{";
+					sendData += getJSONData("method", "3READY_CLICKED");
+					sendData += "," + getJSONData("userNum", String.valueOf(index));
+					sendData += "," + getJSONData("readyState", "1");
+					sendData += "}";
+					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					System.out.println(sendData);
+					return sendData;
+				}
+				else if(sfu.getReadyState().equals("1")) {
+					sfu.setReadyState("0");
+					sendData = "{";
+					sendData += getJSONData("method", "3READY_CLICKED");
+					sendData += "," + getJSONData("userNum", String.valueOf(index));
+					sendData += "," + getJSONData("readyState", "0");
+					sendData += "}";
+					sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+					System.out.println(sendData);
+					return sendData;
+				}
+				else if(sfu.getReadyState().equals("2")) {
+					if(rd.isAllReady()) {
+						rd = sfu.getStation().getRoomUserList().get(sfu.getStation().findRoomObserver(sfu.getRoomId()));
+						for(int i = 0; i < rd.getUserList().size(); i++) {
+							rd.getUserList().get(i).setReadyState("3");
+						}
+						sendData = "{";
+						sendData += getJSONData("method", "3GAME_START");
+						sendData += "}";
+						sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
+						System.out.println("game start : "+sendData);
+						return sendData;
+					}
+					return sendData;
+				}
 				return sendData;
 			}
 			

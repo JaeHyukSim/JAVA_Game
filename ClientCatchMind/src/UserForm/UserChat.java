@@ -1,23 +1,32 @@
+
 package UserForm;
 
 import java.awt.Font;
+import java.net.Socket;
 import java.util.Date;
 
 import javax.swing.JTextField;
+import javax.swing.JWindow;
 import javax.swing.text.StyledEditorKit.BoldAction;
 
-public class UserChat extends JTextField {
-   
-   int userNum;
+import Client.DisplayThread;
+
+public class UserChat extends JWindow {
+	
+	JTextField tf = new JTextField();
+   int userNum, x, y;
    int clock;
    Runnable taskRunnable;
    Thread taskThread;
    Runnable clockRunnable;
    Thread clockThread;
+   Runnable locationRunnable;
+   Thread locationThread;
    
    public UserChat(int userNum) {
       this.userNum = userNum;
-      setFont(new Font(getName(), Font.BOLD, 20));
+      tf.setFont(new Font(getName(), Font.BOLD, 20));
+      add(tf);
       clockRunnable = new ClockThread();
       clockThread = new Thread(clockRunnable);
       clock = 100;
@@ -27,8 +36,10 @@ public class UserChat extends JTextField {
       taskThread.start();
    }
    
-   public void printChat(String message) {
-      setText(" "+message);
+   public void printChat(int x, int y, String message) {
+	   this.x = x;
+	   this.y = y;
+	   tf.setText(" "+message);
       clock = 0;
    }
    
@@ -59,22 +70,22 @@ public class UserChat extends JTextField {
             if(clock/10 == 0) {
                switch(userNum) {
                case 0:
-                  setBounds(270, 85, 5+getText().length()*20, 50);
+                  setBounds(5+x+270, 35+y+85, 5+tf.getText().length()*20, 50);
                   break;
                case 1:
-                  setBounds(270, 290, 5+getText().length()*20, 50);
+                  setBounds(5+x+270, 35+y+290, 5+tf.getText().length()*20, 50);
                   break;
                case 2:
-                  setBounds(270, 495, 5+getText().length()*20, 50);
+                  setBounds(5+x+270, 35+y+495, 5+tf.getText().length()*20, 50);
                   break;
                case 3:
-                  setBounds(1175-(5+getText().length()*20), 85, 5+getText().length()*20, 50);
+                  setBounds(5+x+1175-(5+tf.getText().length()*20), 35+y+85, 5+tf.getText().length()*20, 50);
                   break;
                case 4:
-                  setBounds(1175-(5+getText().length()*20), 290, 5+getText().length()*20, 50);
+                  setBounds(5+x+1175-(5+tf.getText().length()*20), 35+y+290, 5+tf.getText().length()*20, 50);
                   break;
                case 5:
-                  setBounds(1175-(5+getText().length()*20), 495, 5+getText().length()*20, 50);
+                  setBounds(5+x+1175-(5+tf.getText().length()*20), 35+y+495, 5+tf.getText().length()*20, 50);
                   break;
                }
                setVisible(true);

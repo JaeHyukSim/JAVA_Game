@@ -35,7 +35,7 @@ public class RoomData {
 		if(countOfCurrentUser.equals("1")) {
 			return false;
 		}
-		if(countOfCurrentUser.equals(String.valueOf(Integer.parseInt(countOfReadyUser) - 1))) {
+		if(countOfCurrentUser.equals(String.valueOf(Integer.parseInt(countOfReadyUser) + 1))) {
 			return true;
 		}else {
 			return false;
