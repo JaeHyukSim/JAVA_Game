@@ -2,14 +2,17 @@ package UserForm;
 
 import java.awt.Color;
 
+import javax.swing.JButton;
 import javax.swing.JProgressBar;
 
 public class TimeBar extends JProgressBar implements Runnable{
    
    int timelimit;
+   JButton event;
    
    public TimeBar(int timelimit) {
       this.timelimit = timelimit;
+      event = new JButton();
       setMinimum(0);
       setMaximum(timelimit);
       setBounds(5, 35, 340, 30);
@@ -31,6 +34,7 @@ public class TimeBar extends JProgressBar implements Runnable{
          }
          setValue(getValue()-1);
          if(getValue()==30) setForeground(Color.red);
+         if(getValue()==0) event.doClick();
       }
    }
 }

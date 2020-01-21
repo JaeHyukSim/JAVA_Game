@@ -463,6 +463,52 @@ public class ServerMessageProcessor {
 				sfu.getStation().broadcastRoomObserver(sendData, rd.getNumberOfRoom());
 				
 				return sendData;
+			case "3090": // get room enter!
+				int id = Integer.parseInt((String) jsonObj.get("room"));
+				index = sfu.getStation().findRoomObserver(String.valueOf(id));
+				
+				if(index== -1)
+				{
+					// : 찾는 방이 없을때
+					sendData = "{";
+					sendData += getJSONData("method", "2870");
+					sendData += "}";
+					sfu.getStation().unicastObserver(sendData, sfu);
+					return sendData;
+					
+				}
+				
+				rd = sfu.getStation().getRoomUserList().get(index);
+				System.out.println("room id : " + rd.getNumberOfRoom());
+				if (Integer.parseInt(rd.getCountOfCurrentUser()) >= Integer.parseInt(rd.getCountOfMaximumUser())) {
+					// room is full
+					sendData = "{";
+					sendData += getJSONData("method", "3014"); // reject enter to room
+					sendData += "}";
+					sfu.getStation().unicastObserver(sendData, sfu);
+					return sendData;
+				}
+				if (rd.getRoomPassState().equals("0") == false) {
+					// room pass logic
+				}
+				// 1. waiting room set
+				sfu.getStation().removeWaitObserver(sfu);
+				// 2. go into room
+				sendData = "{";
+				sendData += getJSONData("method", "3002");
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, sfu);
+				// 3. find room and register
+				rd.addUserList(sfu);
+				sfu.setRoomId(rd.getNumberOfRoom());
+
+				// 4. init all thing
+				sendData = getAllListData(sfu);
+				sfu.getStation().broadcastWaitObserver(sendData);
+				sendData = getAllGameData(sfu);
+				sfu.getStation().broadcastRoomObserver(sendData, rd.getNumberOfRoom());
+
+				return sendData;
 			case "3400": // init room
 				//해당 방은 sfu.getStation().getRoom
 				ArrayList<RoomData> al = sfu.getStation().getRoomUserList();
@@ -643,6 +689,132 @@ public class ServerMessageProcessor {
 					}
 					return sendData;
 				}
+				return sendData;
+case "3910": // invite Gameroom!
+				
+				// Observer invitedUser;
+				sendData = messageWaitroomList(sfu); // 대기실에 있는 대기자
+
+				sfu.getStation().unicastObserver(sendData, sfu); // 데이터 , 서버한테 요청한 자신한테 데이터 보냄
+				System.out.println("3910 sendData : " + sendData); 
+/*
+				
+				for (int i = 0; i < originalArray.size(); i++) 
+				{
+					if (((JSONObject) originalArray.get(i)).get("id").equals(jsonObj.get("id"))) 
+						{
+							// 1. find id
+							if (WaitRoomDoesIDExist(sfu, (String) jsonObj.get("id"))) 
+							{
+								// 클라이언트에게 보낼 데이터 - 메소드넘버, 초대자id, 초대받은 id,  초대자있는방id
+								sendData = "{";
+								sendData += getJSONData("method", "3930");
+								sendData += "," + getJSONData("invitedid", user.getid());
+								sendData += "," + getJSONData("id", sfu.getId()	);
+								sendData += "," + getJSONData("room", sfu.getRoomId());
+								sendData += "}";
+								
+							break;
+								System.out.println("method:3930" + ",sendData:" + sendData);
+								sfu.getStation().unicastObserver(sendData, sfu);
+								return sendData;
+							}
+						}
+				}
+				*/
+				
+				
+			//	ArrayList<Observer> user = sfu.getStation().getWaitUserList(); // 대기실에 있는 대기자명단
+
+				
+			//	getJSONData("inviteDialogData", String.valueOf(inviteDialogData));
+/*
+				for (int i = 0; i < user.size(); i++) { //
+					if (inviteDialogData.equals(user.get(i).getId())) // 대기실에 일치하는 해당 아이디가 없는 경우
+					{
+						
+						//user.get(i).getId().equals(inviteDialogData)
+						invitedUser = user.get(i);
+						//
+						sendData = "{";
+						sendData += getJSONData("method", "3930");
+						sendData += getJSONData("room", sfu.getRoomId());
+						sendData += "," + getJSONData("inviteid", sfu.getId());
+						sendData += "}";
+						System.out.println("3930 sendData : " +sendData);
+						// sfu.getStation().unicastObserver(sendData, String.valueOf(json id));
+						sfu.getStation().unicastObserver(sendData, invitedUser);
+						// sfu.getId()
+						return sendData;
+					}
+					
+					*/
+					return sendData;
+			case "3960":
+				// 초대메시지가 거절되었을경우 초대자에게 거절 확인 메시지 보내기위함!
+				
+				Observer man = null;
+				index = sfu.getStation().findRoomObserver(String.valueOf(jsonObj.get("roomId")));
+				if(index == -1) { // 방 자체가 없을 경우{
+					return sendData;
+				}
+				rd = sfu.getStation().getRoomUserList().get(index); // 방이 있는 경우, 해당 방 자체를 rd에 저장하겠다.
+				
+				//////////////////////// index 새로 시작
+				index = -1;
+				for(int i = 0; i < rd.getUserList().size(); i++) {
+					if(rd.getUserList().get(i).getId().equals(String.valueOf(jsonObj.get("id")))) {
+						//찾은겁니다.
+						index = i;
+						
+						man = rd.getUserList().get(index);
+						//데이터를 보내겠습니다.man = rd.getUserList().get(index);
+						sendData = "{";
+						sendData += getJSONData("method", "3970");
+						sendData += "," + getJSONData("id", String.valueOf(jsonObj.get("id")));
+						sendData += "}";
+						//클라이언트로 전달하면 됩니다
+						System.out.println("3960 sendData : " + sendData);
+						sfu.getStation().unicastObserver(sendData, man);
+						break;
+					}
+				}
+				//방에서 A를 찾죠 id로 -> 없으면 , 이 사람은 해당 방에서 나간겁니다.
+				return sendData;
+					
+					
+			case "3990":
+				//1. 서버로 보내진 메시지 : 1. 웨이팅 룸의 한 id
+				//2. 해야될 일 : 찾아야죠!? - waiting room과 비교  일치하면 보내고, 못찾으면 다시 메시지를 돌려보내는데 (3930)
+				//3. 먼저, 저희 리스트를 구해야 for문을 돌리겠죠 - waitUserList : sfu.getStaion().getWait...
+				String inviteId = String.valueOf(jsonObj.get("id"));
+				index = -1;
+				ArrayList<Observer> user = sfu.getStation().getWaitUserList();
+				for(int i = 0; i < user.size(); i++) {
+					if(inviteId.equals(user.get(i).getId())) {
+						//찾은거죠
+						index = i;
+						break;
+					}
+				}
+				//못찾으면 : index = -1;
+				if(index == -1) {
+					sendData = "{";
+					sendData += getJSONData("method", "3930");
+					sendData += "," + getJSONData("id", inviteId);
+					sendData += "}";
+					sfu.getStation().unicastObserver(sendData, sfu);
+					return sendData;
+				}
+				//찾았을 경우 : -  B한테 메시지가 가야겠죠? 3940
+				
+				
+				sendData = "{";
+				sendData += getJSONData("method", "2940");
+				sendData += "," + getJSONData("id", sfu.getId());
+				sendData += "," + getJSONData("roomId", sfu.getRoomId());
+				sendData += "}";
+				sfu.getStation().unicastObserver(sendData, user.get(index));
 				return sendData;
 			}
 			
@@ -837,4 +1009,41 @@ public class ServerMessageProcessor {
 		//2. remove from userList
 		sfu.setId("#");
 	}
+	// 메소드의 목적 -> 저희가 대기실에 있는 사람들을 메시지로 만드는 메소드
+		public String messageWaitroomList(ServerFromUser sfu) {
+			String sendData = "";
+
+			ArrayList<Observer> user = sfu.getStation().getWaitUserList(); // 배열로 대기자 보내줌
+			// 1. 제이슨 형태기 때문에 {
+			sendData = "{"; // 시작
+
+			// 2. 모든 유저 데이터를 불러와야 되는데,
+			sendData += getJSONData("method", "3920"); // 서버에서 보내는 메소드 이름( 메소드키:키값
+			sendData += ",";
+			sendData += "\"waitList\" : ["; // 키 waitList
+
+			for (int i = 0; i < user.size(); i++) { //
+
+				sendData += "{";
+				sendData += getJSONData("id", user.get(i).getId());
+				sendData += "," + getJSONData("lv", user.get(i).getLv());
+				sendData += "}";
+
+				if (i != user.size() - 1) {
+					sendData += ",";
+
+				}
+
+			}
+
+			sendData += "]";
+			sendData += "}"; // 끝!
+
+			/*
+			 * sendData = "{hello " + "skldjgsdjgsdlgj" + "sdlgsdlkgjsdlgj" + "" +
+			 * "sdgsdlkgjsdlkgjsdklgjl";
+			 */
+
+			return sendData;
+		}
 }
