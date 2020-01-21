@@ -265,7 +265,9 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 				}
 				break;
 			case "2072":	// for other usr -> get one class
-				
+			case "2904":	// do not allow to enter the room
+				JOptionPane.showMessageDialog(this, "이미 게임중입니다.");
+				break;
 				
 			}
 		} catch (ParseException e) {
