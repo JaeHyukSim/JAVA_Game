@@ -71,7 +71,7 @@ public class SignUpForm implements UserForm{
 		jdialog = new JDialog();
 		idLabel = new JLabel("아이디:");
 		pwdLabel = new JLabel("비밀번호:");
-		pwdOkLabel = new JLabel("비밀번호 확인:");
+		pwdOkLabel = new JLabel("비번확인:");
 		idTF = new JTextField();
 		pwdTF = new JPasswordField();
 		pwdOkTF = new JPasswordField();
@@ -92,11 +92,11 @@ public class SignUpForm implements UserForm{
 		jdialog.setSize(350,700);
 		jdialog.setLocation(600, 300);
 		idLabel.setBounds(30, 40, 50, 30);
-		pwdLabel.setBounds(30, 110, 50, 30);
-		pwdOkLabel.setBounds(30, 180, 50, 30);
-		idTF.setBounds(100, 40, 100, 30);
-		pwdTF.setBounds(100, 110, 100, 30);
-		pwdOkTF.setBounds(100, 180, 100, 30);
+		pwdLabel.setBounds(30, 110, 70, 30);
+		pwdOkLabel.setBounds(30, 180, 70, 30);
+		idTF.setBounds(110, 40, 100, 30);
+		pwdTF.setBounds(110, 110, 100, 30);
+		pwdOkTF.setBounds(110, 180, 100, 30);
 		isExist.setBounds(220, 40, 100, 30);
 		check.setBounds(130, 600, 80, 30);
 		cencel.setBounds(220, 600, 80, 30);

@@ -170,7 +170,7 @@ public class ServerMessageProcessor {
 
 	// very important factor : JSON Message Processing
 	public String processingServerMessage(String data, ServerFromUser sfu) {
-
+		
 		// 필요한것
 		// 1. 유저가 속한 방을 알고 싶을 때 ->
 		// sfu.getStation().findRoomObserver_RoomData(sfu.getRoomId());
