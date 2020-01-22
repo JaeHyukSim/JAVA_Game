@@ -44,7 +44,8 @@ public class GameRoomForm extends JPanel implements UserForm {
 	private InviteDialog inviteDialog;
 
 	private JSONObject json;
-
+	
+	private TimeBar timeBar;
 	// 색상
 	// 프레임
 	Color color = new Color(175, 238, 238);
@@ -259,7 +260,8 @@ private GameRoomForm(DisplayThread dt, Socket socket){
       add(tf);
       
       //7.타이머
-      TimeBar timeBar = new TimeBar(120);
+      timeBar = new TimeBar(120);
+      timeBar.setValue(0);
       round.setBounds(810, 630, 350, 70);
       round.setLayout(null);
       round.setBackground(color);
@@ -587,6 +589,14 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 				// 13. 데이터를 서버로 보냅니다!
 				unt.setInputData(sendData);
 				unt.pushMessage();
+				break;
+			case "3TIMER":		// timer - on
+				String tick = String.valueOf(jsonObj.get("tick"));
+				timeBar.setValue(Integer.parseInt(tick));
+				break;
+			case "3TIMEOUT":	// timer - timeout
+				timeBar.setValue(0);
+				break;
 			}
 		} catch (Exception e) {
 

@@ -18,6 +18,7 @@ public class RoomData {
 	private String[] answerList;
 	private String examiner;
 	private String isAnswer;
+	private Timer timer;
 	
 	public RoomData() {
 		userList = new ArrayList<Observer>();
@@ -173,6 +174,14 @@ public class RoomData {
 
 	public void setIsAnswer(String isAnswer) {
 		this.isAnswer = isAnswer;
+	}
+
+	public Timer getTimer() {
+		return timer;
+	}
+
+	public void setTimer(Timer timer) {
+		this.timer = timer;
 	}
 	
 }

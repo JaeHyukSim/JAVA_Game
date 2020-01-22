@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import javax.swing.JProgressBar;
 
-public class TimeBar extends JProgressBar implements Runnable{
+public class TimeBar extends JProgressBar{
    
    int timelimit;
    
@@ -14,10 +14,10 @@ public class TimeBar extends JProgressBar implements Runnable{
       setMaximum(timelimit);
       setBounds(5, 35, 340, 30);
       setBackground(Color.gray);
-      setForeground(Color.gray);
+      setForeground(Color.green);
       setValue(timelimit);
    }
-
+/*
    @Override
    public void run() {
       // TODO Auto-generated method stub
@@ -33,4 +33,5 @@ public class TimeBar extends JProgressBar implements Runnable{
          if(getValue()==30) setForeground(Color.red);
       }
    }
+   */
 }

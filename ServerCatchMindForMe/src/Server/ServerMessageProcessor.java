@@ -168,6 +168,43 @@ public class ServerMessageProcessor {
 		return res;
 	}
 
+	
+	public void processingTimer(String data, RoomData rd) {
+		try {
+			JSONParser jsonParser = new JSONParser();
+			JSONObject jsonObj = (JSONObject) jsonParser.parse(data);
+			String sendData = "";
+			
+			ArrayList<Observer> users;
+			Observer user;
+			 
+			switch(String.valueOf(jsonObj.get("method"))) {
+			 case "TIMER": // tick을 받는다
+				 users = rd.getUserList();
+				 user = rd.getUserList().get(0);
+				 for(int i = 0; i < users.size(); i++) {
+					 sendData = "{";
+					 sendData += getJSONData("method", "3TIMER");
+					 sendData += getJSONData("tick", String.valueOf(jsonObj.get("tick")));
+					 sendData += "}";
+					 user.getStation().unicastObserver(sendData, users.get(i));
+				 }
+				 return;
+			 case "TIMEOUT": // timer 종료
+				 users = rd.getUserList();
+				 user = rd.getUserList().get(0);
+				 for(int i = 0; i < users.size(); i++) {
+					 sendData = "{";
+					 sendData += getJSONData("method", "3TIMEOUT");
+					 sendData += "}";
+					 user.getStation().unicastObserver(sendData, users.get(i));
+				 }
+				 return;
+			}
+		}catch(Exception e) {
+			System.out.println("ServerMessageProcessor - processingTimer Exception");
+		}
+	}
 	// very important factor : JSON Message Processing
 	public String processingServerMessage(String data, ServerFromUser sfu) {
 		
@@ -888,6 +925,7 @@ public class ServerMessageProcessor {
 					sendData += "}";
 					sfu.getStation().unicastObserver(sendData, sfu);
 					return sendData;
+						
 				}
 				// 찾았을 경우 : - B한테 메시지가 가야겠죠? 3940
 
@@ -898,6 +936,15 @@ public class ServerMessageProcessor {
 				sendData += "}";
 				sfu.getStation().unicastObserver(sendData, user.get(index));
 				return sendData;
+				
+			case "TIMER": // tick인 숫자르 받았을 경우 예를 들어 118
+				
+				String tick = String.valueOf(jsonObj.get("tick"));
+				String roomId = String.valueOf(jsonObj.get("roomId"));
+				
+				sendData = "{";
+				sendData += getJSONData("method", "3TIMERSTART");
+				
 			}
 
 			// 3. Make data in the form of transmission
@@ -1277,6 +1324,11 @@ public class ServerMessageProcessor {
 				sfu.getStation().unicastObserver(String.valueOf(json), user.get(i));
 			}
 		}
+		
+		rd.setTimer(new Timer(this,rd, 120));
+		Thread t = new Thread(rd.getTimer());
+		t.start();
+		
 		return String.valueOf(json);
 	}
 
@@ -1315,6 +1367,9 @@ public class ServerMessageProcessor {
 		Thread t = new Thread(r);
 		t.start();
 
+		if(rd.getTimer() != null) {
+			rd.getTimer().setStop(false);
+		}
 		return String.valueOf(json);
 	}
 
@@ -1346,6 +1401,10 @@ public class ServerMessageProcessor {
 			}
 		}
 		sfu.getStation().unicastObserver(sendData, rd.getUserList().get(index));
+		
+		if(rd.getTimer() != null) {
+			rd.getTimer().setStop(false);
+		}
 		return sendData;
 	}
 
