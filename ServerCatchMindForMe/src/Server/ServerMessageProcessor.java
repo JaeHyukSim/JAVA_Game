@@ -718,6 +718,7 @@ public class ServerMessageProcessor {
 				sendData += "," + getJSONData("x", (String) jsonObj.get("x"));
 				sendData += "," + getJSONData("y", (String) jsonObj.get("y"));
 				sendData += "," + getJSONData("color", (String) jsonObj.get("color"));
+				sendData += "," + getJSONData("brushSize", (String) jsonObj.get("brushSize"));
 				sendData += "}";
 				sfu.getStation().broadcastRoomObserver(sendData, sfu.getRoomId());
 				return sendData;

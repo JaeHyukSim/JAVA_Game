@@ -378,6 +378,18 @@ public class WaitingRoomForm extends JPanel implements UserForm, ActionListener,
 			int data = table1.getSelectedRow();// index
 			System.out.println("data : " + data);
 
+			String passstate = table1.getValueAt(roomFocus, 2).toString();
+			System.out.println("passstate: " + passstate);
+			String havePassword = "비번있음";
+
+			if (passstate.equals(havePassword)) {
+				pwdDialog.setRoomId(String.valueOf(roomFocus));
+				System.out.println("pwdDialog pushed!! : " + roomFocus);
+				pwdDialog.setVisible(true);
+
+				return;
+			}
+			////////////////////
 			// 서버로 보내봅시다.
 			// 1. 메소드를 정해봅시다. 2100 -> 2102
 			String sendData = "{";

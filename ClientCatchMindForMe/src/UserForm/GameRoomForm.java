@@ -462,6 +462,7 @@ private GameRoomForm(DisplayThread dt, Socket socket){
 				int x = Integer.parseInt(String.valueOf(jsonObj.get("x")));
 				int y = Integer.parseInt(String.valueOf(jsonObj.get("y")));
 				sketchPanel.setColor(String.valueOf(jsonObj.get("color")));
+				sketchPanel.setBrushSize(Integer.parseInt(String.valueOf(jsonObj.get("brushSize"))));
 				que.push(x, y);
 				System.out.println("que size : " + que.getSize());
 				break;

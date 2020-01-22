@@ -42,6 +42,8 @@ public class GrSketch extends JPanel implements UserForm{
 	private Runnable userRunnable;
 	private Thread userThread; // ... 데이터 전송을 위한 thread를 선언해 줍니다!!!
 	
+	private int brushSize;
+	private Color savedColor;
 	/*graphic algorithm*/
 	int[][] slidingWindow;
 	int slidingWindowPointer;
@@ -78,6 +80,8 @@ public class GrSketch extends JPanel implements UserForm{
     private String color;
     
     private GrSketch(DisplayThread dt, Socket socket){
+    	brushSize = 10;
+    	savedColor = Color.black;
     	color = "black";
     	this.displayThread = dt;
 		this.socket = socket;
@@ -167,15 +171,24 @@ public class GrSketch extends JPanel implements UserForm{
     	allClear = new JButton("ALL");
     	allClear.setFont(new Font("���ʷյ���",Font.BOLD, 17));
     
-    	colorSelect_bt = new JButton("Color");
+    	colorSelect_bt = new JButton("Col");
 
     	colorSelect_bt.setFont(new Font("���ʷյ���",Font.BOLD, 17));
 
     	thicknessInfo_label = new JLabel("");
-
+    	
+    	
+    	
     	thicknessInfo_label.setFont(new Font("���ʷյ���",Font.BOLD, 15));
 
     	thicknessControl_tf = new JTextField("15", 10);
+    	thicknessControl_tf.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				brushSize = Integer.parseInt(thicknessControl_tf.getText());
+			}
+		});
 
     	thicknessControl_tf.setHorizontalAlignment(JTextField.CENTER);
 
@@ -299,27 +312,28 @@ public class GrSketch extends JPanel implements UserForm{
     	System.out.println("color : " + color);
     	switch(color) {
     	case "black":
-    		can.cr = Color.black;	break;
+    		savedColor = Color.black;	break;
     	case "red":
-    		can.cr = Color.red;	break;
+    		savedColor = Color.red;	break;
     	case "blue":
-    		can.cr = Color.blue;	break;
+    		savedColor = Color.blue;	break;
     	case "green":
-    		can.cr = Color.green;	break;
+    		savedColor = Color.green;	break;
     	case "yellow":
-    		can.cr = Color.yellow;	break;
+    		savedColor = Color.yellow;	break;
     	case "pink":
-    		can.cr = Color.pink;	break;
+    		savedColor = Color.pink;	break;
     	case "magenta":
-    		can.cr = Color.magenta;	break;
+    		savedColor = Color.magenta;	break;
     	case "orange":
-    		can.cr = Color.orange;	break;
+    		savedColor = Color.orange;	break;
     	case "white":
-    		can.cr = Color.white;	break;
+    		savedColor = Color.white;	break;
     	case "whiteAll":
     		can.cr = Color.white;
     		Graphics g = can.getGraphics();
 			g.clearRect(0, 0, can.getWidth(), can.getHeight());
+			can.cr = Color.black;
 			break;
     	}
     }
@@ -327,16 +341,18 @@ public class GrSketch extends JPanel implements UserForm{
     
     
     public void printData(int x, int y) {
-    	
-    	System.out.println("print : (" + x +"," + y + ")");
     	/*
     	startX = x;
 		startY = y;
 		can.x=startX;
 		can.y=startY;
 	    */
-    	can.x = x;	can.y = y;
-		can.repaint(); // it is thread
+    	//can.x = x;	can.y = y;
+    	Graphics g = can.getGraphics();
+    	g.setColor(savedColor);
+    	g.fillOval(x, y, brushSize, brushSize);
+
+		//can.repaint(); // it is thread
 		/*
 		thickness = Integer.parseInt(thicknessControl_tf.getText());
 		endX = x;
@@ -424,6 +440,7 @@ public class GrSketch extends JPanel implements UserForm{
 			sendData += "," + userMessageProcessor.getJSONData("x", String.valueOf(e.getX()));
 			sendData += "," + userMessageProcessor.getJSONData("y", String.valueOf(e.getY()));
 			sendData += "," + userMessageProcessor.getJSONData("color", String.valueOf(color));
+			sendData += "," + userMessageProcessor.getJSONData("brushSize", String.valueOf(brushSize));
 			sendData += "}";
 			
 			//13. 데이터를 서버로 보냅니다!
@@ -557,7 +574,8 @@ public class GrSketch extends JPanel implements UserForm{
     					sendData += userMessageProcessor.getJSONData("method", "3710");
     					sendData += "," + userMessageProcessor.getJSONData("color", String.valueOf(color));
     					sendData += "}";
-    					
+    					color = "black";
+    					can2.cr=Color.black;
     					//13. 데이터를 서버로 보냅니다!
     					unt.setInputData(sendData);
     					unt.pushMessage();
@@ -647,4 +665,13 @@ public class GrSketch extends JPanel implements UserForm{
 		}
 		slidingWindowPointer = 0;
 	}
+
+	public int getBrushSize() {
+		return brushSize;
+	}
+
+	public void setBrushSize(int brushSize) {
+		this.brushSize = brushSize;
+	}
+	
 }	
